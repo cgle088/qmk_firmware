@@ -24,6 +24,8 @@ enum layers {
     _SYM,
     _FUNCTION,
     _ADJUST,
+    TD_LSHIFT_PAREN,
+    TD_RSHIFT_CURLY
 };
 
 bool is_alt_tab_active = false; // ADD this near the begining of keymap.c
@@ -32,16 +34,29 @@ enum custom_keycodes {          // Make sure have the awesome keycode ready
   ALT_TAB = SAFE_RANGE,
 };
 
+#ifdef TAP_DANCE_ENABLE
+qk_tap_dance_action_t tap_dance_actions[] = {
+  [TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_PAREN, KC_LSFT),
+  [TD_RSHIFT_CURLY] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_CURLY_BRACE, KC_RSFT),
+};
+#endif
+
 #ifdef RGBLIGHT_ENABLE
 const rgblight_segment_t PROGMEM sym_layer[] = RGBLIGHT_LAYER_SEGMENTS(
   {
     1, 12, HSV_CYAN
   }
-);  
+);
+
+const rgblight_segment_t PROGMEM nav_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+  {
+    1, 24, HSV_GREEN
+  }
+);
 
 const rgblight_segment_t* const PROGMEM rgb_layers[] = RGBLIGHT_LAYERS_LIST(
-  sym_layer
-  
+  sym_layer,
+  nav_layer  
 );
 
 void keyboard_post_init_user(void){
@@ -76,7 +91,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,-------------------------------------------.                              ,-------------------------------------------.
  * |  Tab   | ' "  | , <  | . >  |   P  |   Y  |                              |   F  |   G  |   C  |   R  |   L  | ALT_TAB|
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |Ctrl/Esc|   A  |   O  |   E  |   U  |   I  |                              |   D  |   H  |   T  |   N  |   S  |Ctrl/- _|
+ * |Ctrl/Esc|   A  |   O  |   E  |   U  |   I  |                              |   D  |   H  |   T  |   N  |   S  |Enter   |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |CapsLk|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | RShift |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
@@ -86,9 +101,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_DVORAK] = LAYOUT(
      KC_TAB  ,KC_QUOTE,KC_COMM,  KC_DOT,   KC_P ,   KC_Y ,                                        KC_F,   KC_G ,  KC_C ,   KC_R ,  KC_L , ALT_TAB,
-     CTL_ESC , KC_A ,  KC_O   ,  KC_E  ,   KC_U ,   KC_I ,                                        KC_D,   KC_H ,  KC_T ,   KC_N ,  KC_S , CTL_MINS,
-     KC_LSFT ,KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , KC_RSFT,
-                                 TG(_SYM), KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_BSPC ,KC_RALT, KC_RGUI, KC_APP
+     CTL_ESC , KC_A ,  KC_O   ,  KC_E  ,   KC_U ,   KC_I ,                                        KC_D,   KC_H ,  KC_T ,   KC_N ,  KC_S , KC_ENT,
+     KC_LSFT ,KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , TD(TD_RSHIFT_CURLY),
+                                 TG(_SYM), KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     TO(_SYM)    , KC_BSPC ,KC_RALT, KC_RGUI, KC_APP
     ),
 
 /*
@@ -109,7 +124,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
       _______, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, _______,                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
       _______, _______, _______, _______, _______, _______, _______, KC_SLCK, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
-                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+                                 _______, _______, _______, _______, _______, TO(_DVORAK), _______, _______, _______, _______
     ),
 
 /*
@@ -130,7 +145,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       KC_GRV ,   KC_1 ,   KC_2 ,   KC_3 ,   KC_4 ,   KC_5 ,                                       KC_6 ,   KC_7 ,   KC_8 ,   KC_9 ,   KC_0 , KC_EQL ,
      KC_TILD , KC_EXLM,  KC_AT , KC_HASH,  KC_DLR, KC_PERC,                                     KC_CIRC, KC_AMPR, KC_ASTR, KC_LPRN, KC_RPRN, KC_PLUS,
      KC_PIPE , KC_BSLS, KC_COLN, KC_SCLN, KC_MINS, KC_LBRC, KC_LCBR, _______, _______, KC_RCBR, KC_RBRC, KC_UNDS, KC_COMM,  KC_DOT, KC_SLSH, KC_QUES,
-                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+                                 _______, _______, _______, _______, _______, TO(_NAV), _______, _______, _______, _______
     ),
 
 /*
@@ -337,6 +352,7 @@ void oled_task_user(void) {
 #ifdef RGBLIGHT_ENABLE
 layer_state_t layer_state_set_user(layer_state_t state){
   rgblight_set_layer_state(0, layer_state_cmp(state, _SYM));
+  rgblight_set_layer_state(1, layer_state_cmp(state, _NAV));
   return state;
 }
 #endif
