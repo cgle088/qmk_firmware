@@ -15,7 +15,6 @@
  */
 #include QMK_KEYBOARD_H
 #include "split_util.h"
-#include "print.h"
 enum layers {
     _DVORAK = 0,
     _QWERTY,
@@ -32,6 +31,12 @@ bool is_alt_tab_active = false; // ADD this near the begining of keymap.c
 uint16_t alt_tab_timer = 0;     // we will be using them soon.
 enum custom_keycodes {          // Make sure have the awesome keycode ready
   ALT_TAB = SAFE_RANGE,
+  SAVE_ALT_TAB,
+  SAVE,
+  COPY,
+  PASTE,
+  CUT,
+
 };
 
 #ifdef TAP_DANCE_ENABLE
@@ -96,15 +101,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |CapsLk|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | RShift |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |Adjust| LGUI | LAlt/| Space| Nav  |  | Sym  | Space| AltGr| RGUI | Menu |
- *                        |      |      | Enter|      |      |  |      |      |      |      |      |
+ *                        |Adjust|   ←  |  →   | Space| Nav  |  | Sym  | Space| AltGr| RGUI | Menu |
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
     [_DVORAK] = LAYOUT(
      KC_TAB  ,KC_QUOTE,KC_COMM,  KC_DOT,   KC_P ,   KC_Y ,                                        KC_F,   KC_G ,  KC_C ,   KC_R ,  KC_L , ALT_TAB,
      CTL_ESC , KC_A ,  KC_O   ,  KC_E  ,   KC_U ,   KC_I ,                                        KC_D,   KC_H ,  KC_T ,   KC_N ,  KC_S , KC_ENT,
      TD(TD_LSHIFT_PAREN),KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , TD(TD_RSHIFT_CURLY),
-                                 TG(_SYM), KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     TO(_SYM)    , KC_BSPC ,KC_RALT, KC_RGUI, KC_APP
+                                 TG(_SYM), KC_LEFT, KC_RGHT, KC_SPC , NAV   ,     TO(_SYM)    , KC_BSPC ,KC_RALT, KC_RGUI, KC_APP
     ),
 
 /*
@@ -296,6 +301,14 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
     }
     //RIGHT ENCODER
     if (index == 1) {
+      if(IS_LAYER_ON(_NAV)){
+        if(clockwise){
+          //select rightwards
+        }else{
+          //select leftwards
+        }
+          //on click select word
+      }else{
         // DEFAULT Page up/Page down
         if (clockwise) {
           if (is_alt_tab_active) {
@@ -314,6 +327,7 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
             tap_code(KC_PGUP);
           }
         }
+      }
     }
 /*    if (index == 2) {
         // DEFAULT Page up/Page down
@@ -379,4 +393,8 @@ void matrix_scan_user(void) { // The very important timer.
       is_alt_tab_active = false;
     }
   }
+}
+
+void dance_brackets(qk_tap_dance_state_t *state, void *user_data){
+
 }
