@@ -7,4 +7,4 @@ LTO_ENABLE = yes
 RGBLIGHT_ENABLE = yes     # Enable keyboard RGB underglow
 SPLIT_KEYBOARD = yes
 CONSOLE_ENABLE = no
-TAP_DANCE_ENABLE = yes
+TAP_DANCE_ENABLE = no
