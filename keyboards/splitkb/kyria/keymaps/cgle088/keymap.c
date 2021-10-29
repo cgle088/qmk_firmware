@@ -27,6 +27,29 @@ enum layers {
     TD_RSHIFT_CURLY
 };
 
+typedef enum {
+	TD_NONE,
+	TD_SINGLE_TAP,
+	TD_SINGLE_HOLD,
+	TD_DOUBLE_TAP,
+	TD_TRIPLE_TAP
+}
+
+typedef struct {
+	bool is_press_action,
+	td_state_t state;
+}
+
+enum {
+		PAREN_SHIFT,
+		CURLY_SHIFT
+}
+
+td_state_t cur_dance(qk_tap_dance_state_t *state);
+
+void x_finished(qk_tap_dance_state_t *state, void *user_data);
+void x_reset(qk_tap_dance_state_t *state, void *user_data);
+
 bool is_alt_tab_active = false; // ADD this near the begining of keymap.c
 uint16_t alt_tab_timer = 0;     // we will be using them soon.
 enum custom_keycodes {          // Make sure have the awesome keycode ready
@@ -41,9 +64,11 @@ enum custom_keycodes {          // Make sure have the awesome keycode ready
 
 #ifdef TAP_DANCE_ENABLE
 qk_tap_dance_action_t tap_dance_actions[] = {
-  [TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_PAREN, KC_LSFT),
+  //[TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_PAREN, KC_LSFT),
+  [TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, SHIFT_FINISHED, SHIFT_RESET);
   [TD_RSHIFT_CURLY] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_CURLY_BRACE, KC_RSFT),
 //   [] = ACTION_TAP_DANCE_DOUBLE(,),
+
 };
 #endif
 
@@ -395,6 +420,40 @@ void matrix_scan_user(void) { // The very important timer.
   }
 }
 
-void dance_brackets(qk_tap_dance_state_t *state, void *user_data){
-
+td_state_t cur_dance(qk_tap_dance_state_t *state) {
+	    if (state->count == 1) {
+			        if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
+			        else return TD_SINGLE_HOLD;
+		} else if (state->count == 2) {
+			if (state->interrupted) return TD_DOUBLE_SINGLE_TAP;
+			else return TD_DOUBLE_TAP;
+		}
+		if (state->count == 3) {
+		        if (state->interrupted || !state->pressed) return TD_TRIPLE_TAP;
+		} else return TD_UNKNOWN;
 }
+
+static td_tap_t shifttap_state = {	
+    .is_press_action = true,
+	    .state = TD_NONE
+};
+
+void shift_finished(qk_tap_dance_state_t *state, void *user_data) {
+	    shifttap_state.state = cur_dance(state);
+		    switch (shifttap_state.state) {
+				        case TD_SINGLE_TAP: register_code(KC_LEFT_PAREN); break;
+						case TD_SINGLE_HOLD: register_code(KC_LSFT); break;
+			}
+}
+
+void shift_reset(qk_tap_dance_state_t *state, void *user_data) {
+	    switch (shifttap_state.state) {
+			        case TD_SINGLE_TAP: unregister_code(KC_LEFT_PAREN); break;
+					case TD_SINGLE_HOLD: unregister_code(KC_LSFT); break;
+		}
+		    shifttap_state.state = TD_NONE;
+}
+			
+			
+			
+			
