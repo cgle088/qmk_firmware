@@ -26,29 +26,30 @@ enum layers {
     TD_LSHIFT_PAREN,
     TD_RSHIFT_CURLY
 };
+ enum{
+		PAREN_SHIFT,
+		CURLY_SHIFT
+ };
 
 typedef enum {
 	TD_NONE,
 	TD_SINGLE_TAP,
 	TD_SINGLE_HOLD,
 	TD_DOUBLE_TAP,
-	TD_TRIPLE_TAP
-}
+  TD_DOUBLE_SINGLE_TAP,
+	TD_TRIPLE_TAP,
+  TD_UNKNOWN,
+} td_state_t;
 
 typedef struct {
-	bool is_press_action,
+	bool is_press_action;
 	td_state_t state;
-}
-
-enum {
-		PAREN_SHIFT,
-		CURLY_SHIFT
-}
+} td_tap_t;
 
 td_state_t cur_dance(qk_tap_dance_state_t *state);
 
-void x_finished(qk_tap_dance_state_t *state, void *user_data);
-void x_reset(qk_tap_dance_state_t *state, void *user_data);
+void shift_finished(qk_tap_dance_state_t *state, void *user_data);
+void shift_reset(qk_tap_dance_state_t *state, void *user_data);
 
 bool is_alt_tab_active = false; // ADD this near the begining of keymap.c
 uint16_t alt_tab_timer = 0;     // we will be using them soon.
@@ -62,15 +63,14 @@ enum custom_keycodes {          // Make sure have the awesome keycode ready
 
 };
 
-#ifdef TAP_DANCE_ENABLE
-qk_tap_dance_action_t tap_dance_actions[] = {
-  //[TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_PAREN, KC_LSFT),
-  [TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, SHIFT_FINISHED, SHIFT_RESET);
-  [TD_RSHIFT_CURLY] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_CURLY_BRACE, KC_RSFT),
-//   [] = ACTION_TAP_DANCE_DOUBLE(,),
-
-};
-#endif
+// #ifdef TAP_DANCE_ENABLE
+// qk_tap_dance_action_t tap_dance_actions[] = {
+//   //[TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_PAREN, KC_LSFT),
+//   [TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, SHIFT_FINISHED, SHIFT_RESET),
+//   [TD_RSHIFT_CURLY] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_CURLY_BRACE, KC_RSFT),
+// //   [] = ACTION_TAP_DANCE_DOUBLE(,),
+// };
+// #endif
 
 #ifdef RGBLIGHT_ENABLE
 const rgblight_segment_t PROGMEM sym_layer[] = RGBLIGHT_LAYER_SEGMENTS(
@@ -126,14 +126,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |CapsLk|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | RShift |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |Adjust|   ←  |  →   | Space| Nav  |  | Sym  | Space| AltGr| RGUI | Menu |
+ *                        |Adjust|   ←  |  →   | Space| Sym  |  | Sym  | Space| AltGr| RGUI | Menu |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
     [_DVORAK] = LAYOUT(
      KC_TAB  ,KC_QUOTE,KC_COMM,  KC_DOT,   KC_P ,   KC_Y ,                                        KC_F,   KC_G ,  KC_C ,   KC_R ,  KC_L , ALT_TAB,
      CTL_ESC , KC_A ,  KC_O   ,  KC_E  ,   KC_U ,   KC_I ,                                        KC_D,   KC_H ,  KC_T ,   KC_N ,  KC_S , KC_ENT,
-     TD(TD_LSHIFT_PAREN),KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , TD(TD_RSHIFT_CURLY),
+     PAREN_SHIFT,KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W ,   KC_V ,  KC_Z , TD(TD_RSHIFT_CURLY),
                                  TG(_SYM), KC_LEFT, KC_RGHT, KC_SPC , NAV   ,     TO(_SYM)    , KC_BSPC ,KC_RALT, KC_RGUI, KC_APP
     ),
 
@@ -164,19 +164,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,-------------------------------------------.                              ,-------------------------------------------.
  * |    `   |  1   |  2   |  3   |  4   |  5   |                              |   6  |  7   |  8   |  9   |  0   |   =    |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |    ~   |  !   |  @   |  #   |  $   |  %   |                              |   ^  |  4   |  5   |  6   |  )   |   +    |
+ * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   ^  |  4   |  5   |  6   |  )   |   +    |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * |    |   |   \  |  :   |  ;   |  -   |  [   |  {   |      |  |      |   }  |   ]  |  1   |  2   |  3   |  /   |   ?    |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |      |      |      |      |      |  |      |      |      |  0   |      |
+ *                        |      |      |  _   |  .   |      |  |  Nav |      |  0   |      |      |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
     [_SYM] = LAYOUT(
       KC_GRV ,   KC_1 ,   KC_2 ,   KC_3 ,   KC_4 ,   KC_5 ,                                        KC_AMPR,   KC_7 ,   KC_8 ,   KC_9 ,   KC_0 , KC_EQL ,
-     KC_TILD , KC_EXLM,  KC_AT , KC_HASH,  KC_DLR, KC_PERC,                                     KC_CIRC, KC_4, KC_5, KC_6, KC_RPRN, KC_PLUS,
+     KC_TILD , KC_SLSH,  KC_EQL, KC_EXLM,  KC_DLR, KC_UNDS,                                     KC_CIRC, KC_4, KC_5, KC_6, KC_RPRN, KC_PLUS,
      KC_PIPE , KC_BSLS, KC_COLN, KC_SCLN, KC_MINS, KC_LBRC, KC_LCBR, _______, _______, KC_RCBR, KC_RBRC, KC_1, KC_2,  KC_3, KC_SLSH, KC_QUES,
-                                 _______, _______, _______, _______, _______, TO(_NAV), _______, _______, KC_0 , _______
+                                 _______, _______, _______, _______, _______, TO(_NAV), _______, KC_0 , _______, _______
     ),
 
 /*
@@ -377,7 +377,6 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         if (!is_alt_tab_active) {
           is_alt_tab_active = true;
           register_code(KC_LALT);
-          uprintf("%s string", record);
           alt_tab_timer = timer_read();
           register_code(KC_TAB);
         }else{
@@ -421,39 +420,56 @@ void matrix_scan_user(void) { // The very important timer.
 }
 
 td_state_t cur_dance(qk_tap_dance_state_t *state) {
-	    if (state->count == 1) {
-			        if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
-			        else return TD_SINGLE_HOLD;
+    if (state->count == 1) {
+      if (state->interrupted || !state->pressed) return TD_SINGLE_TAP;
+      else return TD_SINGLE_HOLD;
 		} else if (state->count == 2) {
 			if (state->interrupted) return TD_DOUBLE_SINGLE_TAP;
 			else return TD_DOUBLE_TAP;
 		}
 		if (state->count == 3) {
-		        if (state->interrupted || !state->pressed) return TD_TRIPLE_TAP;
-		} else return TD_UNKNOWN;
+      if (state->interrupted || !state->pressed) return TD_TRIPLE_TAP;
+		} 
+    else return TD_UNKNOWN;
 }
 
 static td_tap_t shifttap_state = {	
     .is_press_action = true,
-	    .state = TD_NONE
+    .state = TD_NONE
 };
 
 void shift_finished(qk_tap_dance_state_t *state, void *user_data) {
-	    shifttap_state.state = cur_dance(state);
-		    switch (shifttap_state.state) {
-				        case TD_SINGLE_TAP: register_code(KC_LEFT_PAREN); break;
-						case TD_SINGLE_HOLD: register_code(KC_LSFT); break;
-			}
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP: register_code(KC_LEFT_PAREN); break;
+      case TD_SINGLE_HOLD: register_code(KC_LSFT); break;
+      case TD_DOUBLE_TAP: break;
+      case TD_TRIPLE_TAP: break;
+      case TD_UNKNOWN: break;
+      case TD_NONE: break;
+  }
 }
 
 void shift_reset(qk_tap_dance_state_t *state, void *user_data) {
-	    switch (shifttap_state.state) {
-			        case TD_SINGLE_TAP: unregister_code(KC_LEFT_PAREN); break;
-					case TD_SINGLE_HOLD: unregister_code(KC_LSFT); break;
-		}
-		    shifttap_state.state = TD_NONE;
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP: unregister_code(KC_LEFT_PAREN); break;
+    case TD_SINGLE_HOLD: unregister_code(KC_LSFT); break;
+    case TD_DOUBLE_TAP: break;
+    case TD_TRIPLE_TAP: break;
+    case TD_UNKNOWN: break;
+    case TD_NONE: break;
+  }
+  shifttap_state.state = TD_NONE;
 }
 			
+#ifdef TAP_DANCE_ENABLE
+qk_tap_dance_action_t tap_dance_actions[] = {
+  //[TD_LSHIFT_PAREN] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_PAREN, KC_LSFT),
+  [PAREN_SHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_finished, shift_reset),
+  [TD_RSHIFT_CURLY] = ACTION_TAP_DANCE_DOUBLE(KC_LEFT_CURLY_BRACE, KC_RSFT),
+//   [] = ACTION_TAP_DANCE_DOUBLE(,),
+};
+#endif
 			
 			
 			
