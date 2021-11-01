@@ -33,7 +33,9 @@ enum{
     COPY,
     NEW,
     NEW_TAB,
-    LSHIFT
+    LSHIFT,
+    FIND_PAGE,
+    OBJ_ARROW
 };
 
 typedef enum {
@@ -60,6 +62,8 @@ uint16_t alt_tab_timer = 0;     // we will be using them soon.
 enum custom_keycodes {          // Make sure have the awesome keycode ready
     ALT_TAB = SAFE_RANGE,
     SAVE_TAB,
+    CTRL_PGUP,
+    CTRL_PGDN
 };
 
 // #ifdef TAP_DANCE_ENABLE
@@ -131,7 +135,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *            ueu            `----------------------------------'  `----------------------------------'
  */
     [_DVORAK] = LAYOUT(
-     KC_TAB,KC_QUOTE,KC_COMM,  KC_DOT,   KC_P ,   KC_Y ,                                        KC_F,   KC_G ,  TD(COPY) ,  KC_R ,  KC_L , ALT_TAB,
+     KC_TAB,KC_QUOTE,KC_COMM,  KC_DOT,   TD(KC_P) ,   KC_Y ,                                        KC_F,   KC_G ,  TD(COPY) ,  KC_R ,  KC_L , ALT_TAB,
      CTL_ESC, KC_A,  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  TD(NEW),  TD(SAVE) , KC_ENT,
      TD(LSHIFT), KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   KC_X , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_B,   KC_M ,  KC_W,   KC_V ,  KC_Z, KC_LEFT_CURLY_BRACE,
                                  MO(_SYM), KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     TO(_SYM), KC_BSPC ,KC_UP, KC_DOWN, KC_APP
@@ -140,18 +144,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * Sym Layer: Numbers and symbols
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |    `   |  1   |  2   |  3   |  4   |  5   |                              |   6  |  7   |  8   |  9   |  0   |   =    |
+ * |    `   |  1   |  2   |  <   |  >   |  5   |                              |   6  |  7   |  8   |  9   |  0   |   =    |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
  * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   ^  |  4   |  5   |  6   |  )   |   +    |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * |    |   |   \  |  :   |  ;   |  -   |  [   |  {   |      |  |      |   }  |   ]  |  1   |  2   |  3   |  /   |   ?    |
+ * |SAVE_TAB|   \  |  :   |  ;   |  -   |  [   |  {   |      |  |      |   }  |   ]  |  1   |  2   |  3   |  /   |   ?    |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
  *                        |      |      |  _   |  .   |      |  |  Nav |      |  0   |      |      |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
     [_SYM] = LAYOUT(
-      KC_GRV ,   KC_1 ,   KC_2 ,   KC_3 ,   KC_4 ,   KC_5 ,                                        KC_AMPR,   KC_7 ,   KC_8 ,   KC_9 ,   KC_0 , KC_EQL ,
+      KC_GRV ,   KC_1 ,   KC_2 ,   KC_LT ,   TD(OBJ_ARROW),   KC_5 ,                                        KC_AMPR,   KC_7 ,   KC_8 ,   KC_9 ,   KC_0 , KC_EQL ,
      KC_TILD , KC_SLSH,  KC_EQL, KC_EXLM,  KC_DLR, KC_UNDS,                                     KC_CIRC, KC_4, KC_5, KC_6, KC_RPRN, KC_PLUS,
      SAVE_TAB , KC_BSLS, KC_COLN, KC_SCLN, KC_MINS, KC_LBRC, KC_LCBR, _______, _______, KC_RCBR, KC_RBRC, KC_1, KC_2,  KC_3, KC_SLSH, KC_QUES,
                                  _______, RCS(KC_LEFT), RCS(KC_RIGHT), _______, _______, TO(_NAV), _______, KC_0 , _______, _______
@@ -325,12 +329,17 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
     }
     //RIGHT ENCODER
     if (index == 1) {
-      if(IS_LAYER_ON(_NAV)){
+      if(IS_LAYER_ON(_SYM)){
         if(clockwise){
           //select rightwards
+          register_code(KC_RCTL);
+          tap_code(KC_PGDN);
         }else{
+          register_code(KC_RCTL);
+          tap_code(KC_PGUP);
           //select leftwards
         }
+        unregister_code(KC_RCTL);
           //on click select word
       }else{
         // DEFAULT Page up/Page down
@@ -430,6 +439,17 @@ void matrix_scan_user(void) { // The very important timer.
       unregister_code(KC_LALT);
       is_alt_tab_active = false;
     }
+  }
+}
+
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record){
+  switch(keycode){
+    case (LSHIFT):
+      return 50;
+    case (OBJ_ARROW):
+      return 50;
+    default:
+      return TAPPING_TERM;
   }
 }
 
@@ -551,6 +571,68 @@ void new_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
+void find_page_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+           tap_code(KC_P);
+           break;
+      case TD_SINGLE_HOLD:
+           register_code(KC_RCTL);
+           tap_code(KC_P);
+           break;
+      case TD_DOUBLE_TAP: break;
+      case TD_TRIPLE_TAP: break;
+      case TD_UNKNOWN: break;
+      case TD_NONE: break;
+  }
+}
+
+void find_page_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP: break;
+    case TD_SINGLE_HOLD:
+        unregister_code(KC_RCTL);
+        break;
+    case TD_DOUBLE_TAP: break;
+    case TD_TRIPLE_TAP: break;
+    case TD_UNKNOWN: break;
+    case TD_NONE: break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
+void obj_arrow_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+           register_code16(KC_GT);
+           break;
+      case TD_SINGLE_HOLD:
+           SEND_STRING("->");
+           break;
+      case TD_DOUBLE_TAP: break;
+      case TD_TRIPLE_TAP: break;
+      case TD_UNKNOWN: break;
+      case TD_NONE: break;
+  }
+}
+
+void obj_arrow_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP: 
+      unregister_code16(KC_GT);
+      break;
+    case TD_SINGLE_HOLD:
+        break;
+    case TD_DOUBLE_TAP: break;
+    case TD_TRIPLE_TAP: break;
+    case TD_UNKNOWN: break;
+    case TD_NONE: break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
 void shift_brace_finished(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
@@ -597,10 +679,10 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [SAVE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, s_finished, s_reset),
   [COPY] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, copy_finished, copy_reset),
   [NEW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, new_finished, new_reset),
-  [LSHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_brace_finished, shift_brace_reset)
+  [LSHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_brace_finished, shift_brace_reset),
+  [FIND_PAGE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, find_page_finished, find_page_reset),
+  [OBJ_ARROW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, obj_arrow_finished, obj_arrow_reset)
 
 //   [] = ACTION_TAP_DANCE_FN_ADVANCED(NULL,,),
 };
 #endif
-
-
