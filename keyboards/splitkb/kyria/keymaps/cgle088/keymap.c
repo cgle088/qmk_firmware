@@ -76,6 +76,11 @@ enum custom_keycodes {          // Make sure have the awesome keycode ready
 // #endif
 
 #ifdef RGBLIGHT_ENABLE
+const rgblight_segment_t PROGMEM default_layer[] = RGBLIGHT_LAYER_SEGMENTS(
+  {
+    1, 36, HSV_PINK
+  }
+);
 const rgblight_segment_t PROGMEM sym_layer[] = RGBLIGHT_LAYER_SEGMENTS(
   {
     1, 12, HSV_CYAN
@@ -84,11 +89,12 @@ const rgblight_segment_t PROGMEM sym_layer[] = RGBLIGHT_LAYER_SEGMENTS(
 
 const rgblight_segment_t PROGMEM nav_layer[] = RGBLIGHT_LAYER_SEGMENTS(
   {
-    1, 24, HSV_GREEN
+    1, 24, HSV_PURPLE
   }
 );
 
 const rgblight_segment_t* const PROGMEM rgb_layers[] = RGBLIGHT_LAYERS_LIST(
+  default_layer,
   sym_layer,
   nav_layer
 );
@@ -309,9 +315,14 @@ void oled_task_user(void){
   return state;
 }*/
 #ifdef RGBLIGHT_ENABLE
+layer_state_t default_layer_state_set_user(layer_state_t state){
+	rgblight_set_layer_state(0, layer_state_cmp(state, _DVORAK));
+	return state;
+}
+
 layer_state_t layer_state_set_user(layer_state_t state){
-  rgblight_set_layer_state(0, layer_state_cmp(state, _SYM));
-  rgblight_set_layer_state(1, layer_state_cmp(state, _NAV));
+  rgblight_set_layer_state(1, layer_state_cmp(state, _SYM));
+  rgblight_set_layer_state(2, layer_state_cmp(state, _NAV));
   return state;
 }
 #endif
