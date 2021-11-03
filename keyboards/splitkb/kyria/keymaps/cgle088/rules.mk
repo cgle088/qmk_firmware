@@ -1,10 +1,10 @@
-OLED_ENABLE = no
-OLED_DRIVER = SSD1306
+OLED_ENABLE = yes
 OLED_DRIVER_ENABLE = yes # Enables the use of OLED displays
+OLED_DRIVER = SSD1306
 ENCODER_ENABLE = yes       # Enables the use of one or more encoders
 LINK_TIME_OPTIMIZATION_ENABLE = yes
 LTO_ENABLE = yes
-RGBLIGHT_ENABLE = yes     # Enable keyboard RGB underglow
+RGBLIGHT_ENABLE = no     # Enable keyboard RGB underglow
 SPLIT_KEYBOARD = yes
 CONSOLE_ENABLE = no
 TAP_DANCE_ENABLE = yes
