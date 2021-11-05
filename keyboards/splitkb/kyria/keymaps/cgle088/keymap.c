@@ -24,6 +24,7 @@ enum layers {
     _SYM,
     _FUNCTION,
     _ADJUST,
+    _MOUSE,
 };
 
 enum{
@@ -45,6 +46,8 @@ enum{
     UNDO,
     REDO,
     ALL,
+    ALT_DOWN,
+    ALT_UP,
 };
 
 typedef enum {
@@ -145,8 +148,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_DVORAK] = LAYOUT(
      TD(TERMINAL),KC_QUOTE,KC_COMM,  KC_DOT,   TD(FIND_PAGE) ,   TD(REDO) ,                                        TD(FIND),   KC_G ,  TD(COPY) ,  KC_R ,  KC_L , ALT_TAB,
      CTL_ESC, TD(ALL),  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  TD(NEW),  TD(SAVE) , KC_ENT,
-     KC_LSFT, KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   TD(CUT) , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_LEFT_CURLY_BRACE,
-                                 MO(_SYM), KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, KC_APP
+     KC_LSFT, KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   TD(CUT) , KC_LBRC,TG(_NAV),     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_LEFT_CURLY_BRACE,
+                                 TG(_MOUSE), KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, KC_APP
     ),
 /*
  * Sym Layer: Numbers and symbols
@@ -174,9 +177,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,-------------------------------------------.                              ,-------------------------------------------.
  * |        |      |      |      |      |      |                              | PgUp | Home |   ↑  | End  | VolUp| Delete |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |        |  GUI |  Alt | Ctrl | Shift|      |                              | PgDn |  ←   |   ↓  |   →  | VolDn| Insert |
+ * |        |      |      |      |      |ALT_UP|                              | PgDn |  ←   |   ↓  |   →  | VolDn| Insert |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * |        |      |      |      |      |      |      |ScLck |  |      |      | Pause|M Prev|M Play|M Next|VolMut| PrtSc  |
+ * |        |      |      |      |      |LTDOWN|      |      |  |      |      | Pause|M Prev|M Play|M Next|VolMut| PrtSc  |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
@@ -184,8 +187,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  */
     [_NAV] = LAYOUT(
       _______, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
-      _______, KC_LGUI, KC_LALT, KC_LCTL, KC_LSFT, _______,                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
-      _______, _______, _______, _______, _______, _______, _______, KC_SLCK, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
+      _______, _______, _______, _______, _______, TD(ALT_UP),                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
+      _______, _______, _______, _______, _______, TD(ALT_DOWN), _______, _______, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, _______, _______, _______, TD(HOME_SHIFT_END), TO(_DVORAK), _______, _______, _______, _______
     ),
 
@@ -210,6 +213,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                  _______, _______, _______,_______, _______, _______, _______, _______, _______, _______
     ),
 
+/*
+ * Layer template
+ *
+ * ,-------------------------------------------.                              ,-------------------------------------------.
+ * |        |      |      |      |      |      |                              |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |                              |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
+ * |        |      |      |      |      |      |      |      |  |      |      |      |      |      |      |      |        |
+ * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        `----------------------------------'  `----------------------------------'
+ */
+    [_MOUSE] = LAYOUT(
+      _______, _______, _______, _______, _______, _______,                                     _______, _______, _______, _______, _______, _______,
+      _______, _______, _______, KC_BTN1, KC_MS_U, KC_BTN2,                                     _______, _______, _______, _______, _______, _______,
+      _______, _______, _______, KC_MS_L, KC_MS_D, KC_MS_R, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    ),
 // /*
 //  * Layer template
 //  *
@@ -220,7 +243,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
 //  * |        |      |      |      |      |      |      |      |  |      |      |      |      |      |      |      |        |
 //  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
-//  *                        |      |      |      |      |      |  |      |      |      |      |      |
 //  *                        |      |      |      |      |      |  |      |      |      |      |      |
 //  *                        `----------------------------------'  `----------------------------------'
 //  */
@@ -932,6 +954,7 @@ void home_shift_end_finished(qk_tap_dance_state_t *state, void *user_data) {
            tap_code(KC_SCLN);
            break;
       case TD_DOUBLE_TAP:
+          tap_code(KC_BSPC);
            break;
 
       default:
@@ -997,6 +1020,73 @@ void shift_brace_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
+void alt_down_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+          register_code(KC_LALT);
+          tap_code(KC_DOWN);
+          break;
+      case TD_SINGLE_HOLD:
+          register_code(KC_RSFT);
+          register_code(KC_LALT);
+          tap_code(KC_DOWN);
+          break;
+      default:
+        break;
+  }
+}                                                                                                            
+
+void alt_down_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP: 
+      unregister_code(KC_LALT);
+      break;
+    case TD_SINGLE_HOLD:
+      unregister_code(KC_LALT);
+      unregister_code(KC_RSFT);
+      break;
+    case TD_DOUBLE_TAP:
+    default:
+      break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
+void alt_up_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+          register_code(KC_LALT);
+          tap_code(KC_UP);
+          break;
+      case TD_SINGLE_HOLD:
+          register_code(KC_RSFT);
+          register_code(KC_LALT);
+          tap_code(KC_UP);
+          break;
+      default:
+        break;
+  }
+}                                                                                                            
+
+void alt_up_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP: 
+      unregister_code(KC_LALT);
+      break;
+    case TD_SINGLE_HOLD:
+      unregister_code(KC_LALT);
+      unregister_code(KC_RSFT);
+      break;
+    case TD_DOUBLE_TAP:
+    default:
+      break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
+
 #ifdef TAP_DANCE_ENABLE
 qk_tap_dance_action_t tap_dance_actions[] = {
   [SAVE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, s_finished, s_reset),
@@ -1016,6 +1106,8 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [CLOSE_WINDOW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, close_window_finished, close_window_reset),
   [FIND] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, find_finished, find_reset),
   [HOME_SHIFT_END] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, home_shift_end_finished, home_shift_end_reset),
+  [ALT_DOWN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_down_finished, alt_down_reset),
+  [ALT_UP] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_up_finished, alt_up_reset),
 
 //   [] = ACTION_TAP_DANCE_FN_ADVANCED(NULL,,),
 };
