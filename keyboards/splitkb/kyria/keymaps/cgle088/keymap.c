@@ -65,6 +65,8 @@ typedef struct {
 	td_state_t state;
 } td_tap_t;
 
+uint16_t key_timer;
+
 td_state_t cur_dance(qk_tap_dance_state_t *state);
 
 void x_finished(qk_tap_dance_state_t *state, void *user_data);
@@ -278,13 +280,13 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #ifdef OLED_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
   if(!is_keyboard_master()){
-     return OLED_ROTATION_180; 
+     return OLED_ROTATION_180;
   }
   return rotation;
 }
 
 void oled_task_user(void){
-  
+
     // oled_write_P(PSTR("Layer:"), false);
 
     // switch (get_highest_layer(layer_state)){
@@ -422,6 +424,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       unregister_code(KC_RCTL);
       break;
+    case SAVE:
+        if(record->event.pressed){
+            key_timer = timer_read();
+        }else{
+
+        }
     case SAVE_TAB:
         if (record->event.pressed) {
             register_code(KC_RCTL);
@@ -527,7 +535,7 @@ void s_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void s_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
         unregister_code(KC_RCTL);
@@ -630,7 +638,7 @@ void obj_arrow_finished(qk_tap_dance_state_t *state, void *user_data) {
       case TD_SINGLE_HOLD:
            SEND_STRING("->");
            break;
-      case TD_DOUBLE_TAP: 
+      case TD_DOUBLE_TAP:
           SEND_STRING(" => ");
            break;
       default:
@@ -640,7 +648,7 @@ void obj_arrow_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void obj_arrow_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       unregister_code16(KC_GT);
       break;
     default:
@@ -658,10 +666,10 @@ void dlr_this_finished(qk_tap_dance_state_t *state, void *user_data) {
       case TD_SINGLE_HOLD:
            SEND_STRING("$this->");
            break;
-      case TD_DOUBLE_TAP: 
+      case TD_DOUBLE_TAP:
           SEND_STRING("$this->request");
            break;
-      case TD_DOUBLE_HOLD: 
+      case TD_DOUBLE_HOLD:
           SEND_STRING("$this->request['']");
           break;
       default:
@@ -671,7 +679,7 @@ void dlr_this_finished(qk_tap_dance_state_t *state, void *user_data) {
 
 void dlr_this_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       unregister_code16(KC_DLR);
       break;
     default:
@@ -693,11 +701,11 @@ void terminal_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void terminal_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code16(KC_RCTL);
@@ -721,11 +729,11 @@ void close_explorer_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void close_explorer_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code16(KC_RCTL);
@@ -749,11 +757,11 @@ void close_window_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void close_window_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code16(KC_RCTL);
@@ -777,11 +785,11 @@ void paste_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void paste_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
@@ -805,11 +813,11 @@ void cut_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void cut_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
@@ -833,11 +841,11 @@ void redo_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void redo_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
@@ -861,11 +869,11 @@ void undo_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void undo_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
@@ -889,11 +897,11 @@ void all_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void all_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
@@ -923,11 +931,11 @@ void find_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void find_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
       unregister_code16(KC_RCTL);
@@ -960,11 +968,11 @@ void home_shift_end_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void home_shift_end_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       unregister_code(KC_RSFT);
       break;
     case TD_SINGLE_HOLD:
@@ -1035,11 +1043,11 @@ void alt_down_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void alt_down_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       unregister_code(KC_LALT);
       break;
     case TD_SINGLE_HOLD:
@@ -1068,11 +1076,11 @@ void alt_up_finished(qk_tap_dance_state_t *state, void *user_data) {
       default:
         break;
   }
-}                                                                                                            
+}
 
 void alt_up_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
-    case TD_SINGLE_TAP: 
+    case TD_SINGLE_TAP:
       unregister_code(KC_LALT);
       break;
     case TD_SINGLE_HOLD:
