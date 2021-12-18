@@ -48,6 +48,7 @@ enum{
     ALL,
     ALT_DOWN,
     ALT_UP,
+	COMMENT_LINE,
 };
 
 typedef enum {
@@ -157,7 +158,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * Sym Layer: Numbers and symbols
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |    `   |  1   |  +   |  <   |  >   |  5   |                              |   [  |  7   |  8   |  9   |  ]   |   =    |
+ * |    `   |  1   |  +   |  <   |  >   |  #  |                              |   [  |  7   |  8   |  9   |  ]   |   =    |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
  * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   (  |  4   |  5   |  6   |  )   |   -    |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
@@ -168,8 +169,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'  `----------------------------------'
  */
     [_SYM] = LAYOUT(
-      KC_GRV ,   KC_1 ,   KC_PLUS ,   KC_LT ,   TD(OBJ_ARROW),   KC_5 ,                                        KC_LBRC,   KC_7 ,   KC_8 ,   KC_9 ,   KC_RBRC , REFRESH ,
-     KC_TILD , KC_SLSH,  KC_EQL, KC_EXLM,  TD(DLR_THIS), KC_UNDS,                                     KC_LPRN, KC_4, KC_5, KC_6, KC_RPRN, KC_MINS,
+      KC_GRV ,   KC_ASTR ,   KC_PLUS ,   KC_LT ,   TD(OBJ_ARROW),   KC_HASH,                                        KC_LBRC,   KC_7 ,   KC_8 ,   KC_9 ,   KC_RBRC , REFRESH ,
+     KC_TILD , TD(COMMENT_LINE),  KC_EQL, KC_EXLM,  TD(DLR_THIS), KC_UNDS,                                     KC_LPRN, KC_4, KC_5, KC_6, KC_RPRN, KC_MINS,
      SAVE_TAB , KC_BSLS, KC_COLN, KC_SCLN, KC_MINS, KC_LBRC, KC_LCBR, _______, _______, KC_RCBR, KC_LCBR, KC_1, KC_2,  KC_3, KC_RCBR, KC_QUES,
                                  _______, RCS(KC_LEFT), RCS(KC_RIGHT), _______, _______, TO(_NAV), _______, KC_0 , _______, _______
     ),
@@ -1094,6 +1095,34 @@ void alt_up_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
+void comment_line_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+          tap_code(KC_SLSH);
+          break;
+      case TD_SINGLE_HOLD:
+          register_code(KC_RCTL);
+          tap_code(KC_SLSH);
+          break;
+      default:
+        break;
+  }
+}
+
+void comment_line_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_HOLD:
+      unregister_code(KC_RCTL);
+      break;
+    case TD_DOUBLE_TAP:
+	case TD_SINGLE_TAP:
+    default:
+      break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
 
 #ifdef TAP_DANCE_ENABLE
 qk_tap_dance_action_t tap_dance_actions[] = {
@@ -1116,6 +1145,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [HOME_SHIFT_END] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, home_shift_end_finished, home_shift_end_reset),
   [ALT_DOWN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_down_finished, alt_down_reset),
   [ALT_UP] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_up_finished, alt_up_reset),
+[COMMENT_LINE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_line_finished, comment_line_reset),
 
 //   [] = ACTION_TAP_DANCE_FN_ADVANCED(NULL,,),
 };
