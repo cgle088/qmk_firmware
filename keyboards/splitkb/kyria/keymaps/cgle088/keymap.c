@@ -441,9 +441,11 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             unregister_code(KC_TAB);
             unregister_code(KC_LALT);
             wait_ms(200);
-            register_code(KC_RCTL);
+            register_code(KC_RSFT);
+            tap_code(KC_F10);
+            unregister_code(KC_RSFT);
+            tap_code(KC_H);
             tap_code(KC_R);
-            unregister_code(KC_RCTL);
         }
         break;
     case KC_BSPC:{
