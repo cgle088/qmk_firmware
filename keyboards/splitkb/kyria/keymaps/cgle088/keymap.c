@@ -158,7 +158,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * Sym Layer: Numbers and symbols
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |    `   |  1   |  +   |  <   |  >   |  #  |                              |   [  |  7   |  8   |  9   |  ]   |   =    |
+ * |    `   |  *   |  +   |  <   |  >   |  #  |                               |   [  |  7   |  8   |  9   |  ]   |   =    |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
  * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   (  |  4   |  5   |  6   |  )   |   -    |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
@@ -279,20 +279,47 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         oled_write_raw_P(kyria_logo, sizeof(kyria_logo));
     }*/
 #ifdef OLED_ENABLE
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-  if(!is_keyboard_master()){
-     return OLED_ROTATION_180;
-  }
-  return rotation;
-}
+bool oled_task_user(void) {
+    // Host Keyboard Layer Status
+    oled_write_P(PSTR("Layer: "), false);
 
-void oled_task_user(void){
+    switch (get_highest_layer(layer_state)) {
+        case _DVORAK:
+            oled_write_P(PSTR("Default\n"), false);
+            break;
+        // case _FN:
+        //     oled_write_P(PSTR("FN\n"), false);
+        //     break;
+        // case _ADJ:
+        //     oled_write_P(PSTR("ADJ\n"), false);
+        //     break;
+        default:
+            // Or use the write_ln shortcut over adding '\n' to the end of your string
+            oled_write_ln_P(PSTR("Undefined"), false);
+    }
+
+    // Host Keyboard LED Status
+    led_t led_state = host_keyboard_led_state();
+    oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
+    oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
+    oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
+
+    return false;
+}
+// oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+//   if(!is_keyboard_master()){
+//      return OLED_ROTATION_180;
+//   }
+//   return rotation;
+// }
+
+// bool oled_task_user(void){
 
     // oled_write_P(PSTR("Layer:"), false);
 
     // switch (get_highest_layer(layer_state)){
     //     case _DVORAK:
-            oled_write_P(PSTR("Default\n"), false);
+            // oled_write_P(PSTR("Default\n"), false);
     //         break;
     //     case _SYM:
     //         oled_write_P(PSTR("SYM\n"), false);
@@ -304,7 +331,7 @@ void oled_task_user(void){
     //     oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
     //     oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
     //     oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
-}
+// }
 #endif
 
 /*layer_state_t layer_state_set_user(layer_state_t state) {
@@ -344,26 +371,43 @@ layer_state_t layer_state_set_user(layer_state_t state){
 bool encoder_update_user(uint8_t index, bool clockwise) {
 
     if (index == 0) {
-        // DEFAULT Page up/Page down
-        if (clockwise) {
-            tap_code(KC_PGDN);
-        } else {
-            tap_code(KC_PGUP);
-        }
+        if(IS_LAYER_ON(_DVORAK)){
+          if(clockwise){
+            //select rightwards
+            // register_code(KC_RCTL);
+            tap_code(KC_MS_U);
+          }else{
+            // register_code(KC_RCTL);
+            tap_code(KC_MS_D);
+            //select leftwards
+          }
+        // unregister_code(KC_RCTL);
+          //on click select word
+      }
+        // // DEFAULT Page up/Page down
+        // if (clockwise) {
+        //     tap_code(KC_PGDN);
+        // } else {
+        //     tap_code(KC_PGUP);
+        // }
     }
     //RIGHT ENCODER
-    if (index == 1) {
-      if(IS_LAYER_ON(_SYM)){
+    else if (index == 1) {
+      if(IS_LAYER_ON(_DVORAK)){
         if(clockwise){
           //select rightwards
-          register_code(KC_RCTL);
-          tap_code(KC_PGDN);
+          // register_code(KC_RCTL);
+          tap_code(KC_MS_RIGHT);
+          tap_code(KC_MS_RIGHT);
+          tap_code(KC_MS_RIGHT);
         }else{
-          register_code(KC_RCTL);
-          tap_code(KC_PGUP);
+          // register_code(KC_RCTL);
+          tap_code(KC_MS_LEFT);
+          tap_code(KC_MS_LEFT);
+          tap_code(KC_MS_LEFT);
           //select leftwards
         }
-        unregister_code(KC_RCTL);
+        // unregister_code(KC_RCTL);
           //on click select word
       }else{
         // DEFAULT Page up/Page down
@@ -386,14 +430,21 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         }
       }
     }
-/*    if (index == 2) {
-        // DEFAULT Page up/Page down
-        if (clockwise) {
-            tap_code(KC_PGDN);
-        } else {
-            tap_code(KC_PGUP);
-        }
-    }*/
+    // else{
+    //     if(IS_LAYER_ON(_SYM)){
+    //     if(clockwise){
+    //       //select rightwards
+    //       // register_code(KC_RCTL);
+    //       tap_code(KC_MS_U);
+    //     }else{
+    //       // register_code(KC_RCTL);
+    //       tap_code(KC_MS_D);
+    //       //select leftwards
+    //     }
+    //     // unregister_code(KC_RCTL);
+    //       //on click select word
+    //   }
+    // }
 
     return false;
 }
@@ -1147,7 +1198,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [HOME_SHIFT_END] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, home_shift_end_finished, home_shift_end_reset),
   [ALT_DOWN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_down_finished, alt_down_reset),
   [ALT_UP] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_up_finished, alt_up_reset),
-[COMMENT_LINE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_line_finished, comment_line_reset),
+  [COMMENT_LINE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, comment_line_finished, comment_line_reset),
 
 //   [] = ACTION_TAP_DANCE_FN_ADVANCED(NULL,,),
 };
