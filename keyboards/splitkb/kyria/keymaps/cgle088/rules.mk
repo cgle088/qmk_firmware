@@ -1,5 +1,5 @@
-OLED_ENABLE = yes
-OLED_DRIVER_ENABLE = yes # Enables the use of OLED displays
+OLED_ENABLE = no
+OLED_DRIVER_ENABLE = no # Enables the use of OLED displays
 OLED_DRIVER = SSD1306
 ENCODER_ENABLE = yes       # Enables the use of one or more encoders
 LINK_TIME_OPTIMIZATION_ENABLE = yes

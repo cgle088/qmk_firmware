@@ -48,7 +48,7 @@ enum{
     ALL,
     ALT_DOWN,
     ALT_UP,
-	COMMENT_LINE,
+	  COMMENT_LINE,
 };
 
 typedef enum {
@@ -80,7 +80,8 @@ enum custom_keycodes {          // Make sure have the awesome keycode ready
     SAVE_TAB,
     CTRL_PGUP,
     CTRL_PGDN,
-    REFRESH
+    REFRESH,
+    REFRESH_FRAME
 };
 
 #ifdef RGBLIGHT_ENABLE
@@ -151,16 +152,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_DVORAK] = LAYOUT(
      TD(TERMINAL),KC_QUOTE,KC_COMM,  KC_DOT,   TD(FIND_PAGE) ,   TD(REDO) ,                                        TD(FIND),   KC_G ,  TD(COPY) ,  KC_R ,  KC_L , ALT_TAB,
      CTL_ESC, TD(ALL),  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  TD(NEW),  TD(SAVE) , KC_ENT,
-     KC_LSFT, KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   TD(CUT) , KC_LBRC,TG(_NAV),     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_LEFT_CURLY_BRACE,
-                                 TG(_MOUSE), KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, KC_APP
+     KC_LSFT, KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   TD(CUT) , KC_LBRC,TG(_NAV),     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_QUES,
+                                 TG(_MOUSE), KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, ALT_TAB
     ),
 /*
  * Sym Layer: Numbers and symbols
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |    `   |  *   |  +   |  <   |  >   |  #  |                               |   [  |  7   |  8   |  9   |  ]   |   =    |
+ * |    `   |  *   |  +   |  <   |  >   |  #  |                               |   [  |  7   |  8   |  9   |  ]   |   &    |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   (  |  4   |  5   |  6   |  )   |   -    |
+ * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   (  |  4   |  5   |  6   |  )   |   |    |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * |SAVE_TAB|   \  |  :   |  ;   |  -   |  [   |  {   |      |  |      |   }  |   {  |  1   |  2   |  3   |  }   |   ?    |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
@@ -169,8 +170,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'  `----------------------------------'
  */
     [_SYM] = LAYOUT(
-      KC_GRV ,   KC_ASTR ,   KC_PLUS ,   KC_LT ,   TD(OBJ_ARROW),   KC_HASH,                                        KC_LBRC,   KC_7 ,   KC_8 ,   KC_9 ,   KC_RBRC , REFRESH ,
-     KC_TILD , TD(COMMENT_LINE),  KC_EQL, KC_EXLM,  TD(DLR_THIS), KC_UNDS,                                     KC_LPRN, KC_4, KC_5, KC_6, KC_RPRN, KC_MINS,
+      KC_GRV ,   KC_ASTR ,   KC_PLUS ,   KC_LT ,   TD(OBJ_ARROW),   KC_HASH,                                        KC_LBRC,   KC_7 ,   KC_8 ,   KC_9 ,   KC_RBRC , KC_AMPR ,
+     REFRESH_FRAME, TD(COMMENT_LINE),  KC_EQL, KC_EXLM,  TD(DLR_THIS), KC_UNDS,                                     KC_LPRN, KC_4, KC_5, KC_6, KC_RPRN, KC_PIPE,
      SAVE_TAB , KC_BSLS, KC_COLN, KC_SCLN, KC_MINS, KC_LBRC, KC_LCBR, _______, _______, KC_RCBR, KC_LCBR, KC_1, KC_2,  KC_3, KC_RCBR, KC_QUES,
                                  _______, RCS(KC_LEFT), RCS(KC_RIGHT), _______, _______, TO(_NAV), _______, KC_0 , _______, _______
     ),
@@ -216,6 +217,26 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                  _______, _______, _______,_______, _______, _______, _______, _______, _______, _______
     ),
 
+/*
+ * Function Layer: Function keys
+ *
+ * ,-------------------------------------------.                              ,-------------------------------------------.
+ * |        |  F9  | F10  | F11  | F12  |      |                              |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
+ * |        |  F5  |  F6  |  F7  |  F8  |      |                              |      | Shift| Ctrl |  Alt |  GUI |        |
+ * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
+ * |        |  F1  |  F2  |  F3  |  F4  |      |      |      |  |      |      |      |      |      |      |      |        |
+ * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        `----------------------------------'  `----------------------------------'
+ */
+    [_FUNCTION] = LAYOUT(
+      _______,  KC_F9 ,  KC_F10,  KC_F11,  KC_F12, _______,                                     _______, _______, _______, _______, _______, _______,
+      _______,  KC_F5 ,  KC_F6 ,  KC_F7 ,  KC_F8 , _______,                                     _______, KC_RSFT, KC_RCTL, KC_LALT, KC_RGUI, _______,
+      _______,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
+    ),
 /*
  * Layer template
  *
@@ -282,28 +303,45 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 #ifdef OLED_ENABLE
 bool oled_task_user(void) {
     // Host Keyboard Layer Status
-    oled_write_P(PSTR("Layer: "), false);
-
+    // oled_write_P(PSTR("Layer: "), false);
+  if(is_keyboard_master()){
     switch (get_highest_layer(layer_state)) {
         case _DVORAK:
-            oled_write_P(PSTR("Default\n"), false);
+            oled_write_P(PSTR("Dvorak\n"), false);
             break;
         case _SYM:
-            oled_write_P(PSTR("FN\n"), false);
+            oled_write_P(PSTR("Sym\n"), false);
             break;
         case _NAV:
-            oled_write_P(PSTR("ADJ\n"), false);
+            oled_write_P(PSTR("Nav\n"), false);
             break;
         default:
             // Or use the write_ln shortcut over adding '\n' to the end of your string
             oled_write_ln_P(PSTR("Undefined"), false);
     }
+  }
+  if(is_keyboard_left()){
+       switch (get_highest_layer(layer_state)) {
+        case _DVORAK:
+            oled_write_P(PSTR("Dvorak\n"), false);
+            break;
+        case _SYM:
+            oled_write_P(PSTR("Sym\n"), false);
+            break;
+        case _NAV:
+            oled_write_P(PSTR("Nav\n"), false);
+            break;
+        default:
+            // Or use the write_ln shortcut over adding '\n' to the end of your string
+            oled_write_ln_P(PSTR("Undefined"), false);
+       }
+  }
 
     // Host Keyboard LED Status
-    led_t led_state = host_keyboard_led_state();
-    oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
-    oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
-    oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
+    // led_t led_state = host_keyboard_led_state();
+    // oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
+    // oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
+    // oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
 
     return false;
 }
@@ -404,14 +442,14 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         if(IS_LAYER_ON(_DVORAK)){
           if(clockwise){
             //select rightwards
-            // register_code(KC_RCTL);
-            tap_code(KC_MS_U);
+            register_code(KC_RCTL);
+            tap_code(KC_PGUP);
           }else{
-            // register_code(KC_RCTL);
-            tap_code(KC_MS_D);
+            register_code(KC_RCTL);
+            tap_code(KC_PGDN);
             //select leftwards
           }
-        // unregister_code(KC_RCTL);
+        unregister_code(KC_RCTL);
           //on click select word
       }
         // // DEFAULT Page up/Page down
@@ -423,27 +461,27 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
     }
     //RIGHT ENCODER
     else if (index == 1) {
-      if(IS_LAYER_ON(_DVORAK)){
-        if(clockwise){
-          //select rightwards
-          // register_code(KC_RCTL);
-          tap_code(KC_MS_RIGHT);
-          tap_code(KC_MS_RIGHT);
-          tap_code(KC_MS_RIGHT);
-        }else{
-          // register_code(KC_RCTL);
-          tap_code(KC_MS_LEFT);
-          tap_code(KC_MS_LEFT);
-          tap_code(KC_MS_LEFT);
-          //select leftwards
-        }
-        // unregister_code(KC_RCTL);
-          //on click select word
-      }else{
+      // if(IS_LAYER_ON(_DVORAK)){
+      //   if(clockwise){
+      //     //select rightwards
+      //     // register_code(KC_RCTL);
+      //     tap_code(KC_MS_RIGHT);
+      //     tap_code(KC_MS_RIGHT);
+      //     tap_code(KC_MS_RIGHT);
+      //   }else{
+      //     // register_code(KC_RCTL);
+      //     tap_code(KC_MS_LEFT);
+      //     tap_code(KC_MS_LEFT);
+      //     tap_code(KC_MS_LEFT);
+      //     //select leftwards
+      //   }
+      //   // unregister_code(KC_RCTL);
+      //     //on click select word
+      // }else{
         // DEFAULT Page up/Page down
         if (clockwise) {
           if (is_alt_tab_active) {
-            tap_code(KC_RIGHT);
+            tap_code(KC_LEFT);
             alt_tab_timer = timer_read();
           } else {
             //DEFAULT ENCODER
@@ -452,14 +490,14 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         } else {
           if (is_alt_tab_active) {
             alt_tab_timer = timer_read();
-            tap_code(KC_LEFT);
+            tap_code(KC_RIGHT);
           } else {
             //DEFAULT ENCODER
             tap_code(KC_PGUP);
           }
         }
       }
-    }
+    // }
     // else{
     //     if(IS_LAYER_ON(_SYM)){
     //     if(clockwise){
@@ -505,6 +543,15 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         tap_code(KC_R);
       }
       unregister_code(KC_RCTL);
+      break;
+    case REFRESH_FRAME:
+      if(record->event.pressed){
+        register_code(KC_RSFT);
+        tap_code(KC_F10);
+        unregister_code(KC_RSFT);
+        tap_code(KC_H);
+        tap_code(KC_R);
+      }
       break;
     case SAVE:
         if(record->event.pressed){
