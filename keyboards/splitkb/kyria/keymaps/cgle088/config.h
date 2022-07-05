@@ -33,7 +33,7 @@
 #define OLED_DISPLAY_128X64
 #define OLED_FONT_WIDTH 6
 #define OLED_FONT_HEIGHT 8
-#define TAPPING_TERM_PER_KEY
+#define TAPPING_TERM 150
 
 
 //Lets you roll mod-tap keys

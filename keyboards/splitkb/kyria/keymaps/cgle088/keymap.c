@@ -49,6 +49,7 @@ enum{
     ALT_DOWN,
     ALT_UP,
 	  COMMENT_LINE,
+    JIRA,
 };
 
 typedef enum {
@@ -74,14 +75,20 @@ void x_finished(qk_tap_dance_state_t *state, void *user_data);
 void x_reset(qk_tap_dance_state_t *state, void *user_data);
 
 bool is_alt_tab_active = false; // ADD this near the begining of keymap.c
+bool is_ctrl_tab_active = false; // ADD this near the begining of keymap.c
 uint16_t alt_tab_timer = 0;     // we will be using them soon.
+uint16_t ctrl_tab_timer = 0;     // we will be using them soon.
 enum custom_keycodes {          // Make sure have the awesome keycode ready
     ALT_TAB = SAFE_RANGE,
     SAVE_TAB,
     CTRL_PGUP,
     CTRL_PGDN,
+    CTRL_BACK,
+    CTRL_DELETE,
+    CTRL_TAB,
     REFRESH,
-    REFRESH_FRAME
+    REFRESH_FRAME,
+    CTRL_F2,
 };
 
 #ifdef RGBLIGHT_ENABLE
@@ -139,21 +146,21 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * Base Layer: Dvorak
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |  Tab   | ' "  | , <  | . >  |   P  |   Y  |                              |   F  |   G  |   C  |   R  |   L  | ALT_TAB|
+ * |  Tab   | ' "  | , <  | . >  |   P  |   Y  |                              |   F  |   G  |   C  |   R  |   L  | Delete |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
  * |Ctrl/Esc|   A  |   O  |   E  |   U  |   I  |                              |   D  |   H  |   T  |   N  |   S  |Enter   |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |CapsLk|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | RShift |
+ * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |ctrltab|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | ?      |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |Adjust|   ←  |  →   | Space| Sym  |  | Sym  | Space| AltGr| RGUI | Menu |
+ *                        | SAVE |   ←  |  →   | Space| Sym  |  | Sym  | Space| AltGr| RGUI | Menu |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *            ueu            `----------------------------------'  `----------------------------------'
  */
     [_DVORAK] = LAYOUT(
-     TD(TERMINAL),KC_QUOTE,KC_COMM,  KC_DOT,   TD(FIND_PAGE) ,   TD(REDO) ,                                        TD(FIND),   KC_G ,  TD(COPY) ,  KC_R ,  KC_L , ALT_TAB,
-     CTL_ESC, TD(ALL),  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  TD(NEW),  TD(SAVE) , KC_ENT,
-     KC_LSFT, KC_SCLN, KC_Q   ,  KC_J  ,   KC_K ,   TD(CUT) , KC_LBRC,TG(_NAV),     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_QUES,
-                                 TG(_MOUSE), KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, ALT_TAB
+     TD(TERMINAL),KC_QUOTE,KC_COMM,  KC_DOT,   TD(FIND_PAGE) ,   TD(REDO) ,                                        TD(FIND),   KC_G ,  TD(COPY) ,  KC_R ,  KC_L, KC_DEL,
+     CTL_ESC, TD(ALL),  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  KC_N,  KC_S , KC_ENT,
+     KC_LSFT, KC_SCLN, KC_Q   ,  TD(JIRA)  ,   KC_K ,   TD(CUT) , KC_LBRC, CTRL_TAB,     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_QUES,
+                                 SAVE, KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, ALT_TAB
     ),
 /*
  * Sym Layer: Numbers and symbols
@@ -161,19 +168,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,-------------------------------------------.                              ,-------------------------------------------.
  * |    `   |  *   |  +   |  <   |  >   |  #  |                               |   [  |  7   |  8   |  9   |  ]   |   &    |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |    ~   |  /   |  =   |  !   |  $   |  _   |                              |   (  |  4   |  5   |  6   |  )   |   |    |
+ * |RefFrame|  /   |  =   |  !   |  $   |  _   |                              |   (  |  4   |  5   |  6   |  )   |   |    |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * |SAVE_TAB|   \  |  :   |  ;   |  -   |  [   |  {   |      |  |      |   }  |   {  |  1   |  2   |  3   |  }   |   ?    |
+ * |SAVE_TAB|   \  |  `   |  %   |  -   |  @   |  {   |      |  |      |   .  |   {  |  1   |  2   |  3   |  }   |   ?    |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |      |      |  _   |  .   |      |  |  Nav |      |  0   |      |      |
+ *                        |      |      |      |      |      |  |  Nav |      |  0   |      |      |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
     [_SYM] = LAYOUT(
       KC_GRV ,   KC_ASTR ,   KC_PLUS ,   KC_LT ,   TD(OBJ_ARROW),   KC_HASH,                                        KC_LBRC,   KC_7 ,   KC_8 ,   KC_9 ,   KC_RBRC , KC_AMPR ,
      REFRESH_FRAME, TD(COMMENT_LINE),  KC_EQL, KC_EXLM,  TD(DLR_THIS), KC_UNDS,                                     KC_LPRN, KC_4, KC_5, KC_6, KC_RPRN, KC_PIPE,
-     SAVE_TAB , KC_BSLS, KC_COLN, KC_SCLN, KC_MINS, KC_LBRC, KC_LCBR, _______, _______, KC_RCBR, KC_LCBR, KC_1, KC_2,  KC_3, KC_RCBR, KC_QUES,
-                                 _______, RCS(KC_LEFT), RCS(KC_RIGHT), _______, _______, TO(_NAV), _______, KC_0 , _______, _______
+     SAVE_TAB , KC_BSLS, KC_GRV, KC_PERC, KC_MINS, KC_AT, KC_LBRC, _______, _______, KC_DOT, KC_LCBR, KC_1, KC_2,  KC_3, KC_RCBR, KC_QUES,
+                                  _______, _______, _______, _______, TO(_NAV), _______, _______, KC_0 , KC_DOT, _______
     ),
 /*
  * Nav Layer: Media, navigation
@@ -181,40 +188,19 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * ,-------------------------------------------.                              ,-------------------------------------------.
  * |        |      |      |      |      |      |                              | PgUp | Home |   ↑  | End  | VolUp| Delete |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |        |      |      |      |      |ALT_UP|                              | PgDn |  ←   |   ↓  |   →  | VolDn| Insert |
+ * |        |      |      | sc+<-| sc+->|ALT_UP|                              | PgDn |  ←   |   ↓  |   →  | VolDn| Insert |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * |        |      |      |      |      |LTDOWN|      |      |  |      |      | Pause|M Prev|M Play|M Next|VolMut| PrtSc  |
+ * |        |      |      |      |ctrlf2|LTDOWN|      |      |  |      |      | Pause|M Prev|M Play|M Next|VolMut| PrtSc  |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |      |      |      |      |      |  |      |      |      |      |      |
- *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        |      | CTRL | ctrl |      |      |  |      |      |      |      |      |
+ *                        |      | Back |delete|      |      |  |      |      |      |      |      |
  *                        `----------------------------------'  `----------------------------------'
  */
     [_NAV] = LAYOUT(
       _______, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
-      _______, _______, _______, _______, _______, TD(ALT_UP),                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
-      _______, _______, _______, _______, _______, TD(ALT_DOWN), _______, _______, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
-                                 _______, _______, _______, _______, TD(HOME_SHIFT_END), TO(_DVORAK), _______, _______, _______, _______
-    ),
-
-/*
- * Adjust Layer: Default layer settings, RGB
- *
- * ,-------------------------------------------.                              ,-------------------------------------------.
- * |        |      |      |QWERTY|      |      |                              |      |      |      |      |      |        |
- * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |        |      |      |Dvorak|      |      |                              | TOG  | SAI  | HUI  | VAI  | MOD  |        |
- * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * |        |      |      |Colmak|      |      |      |      |  |      |      |      | SAD  | HUD  | VAD  | RMOD |        |
- * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |      |      |      |      |      |  |      |      |      |      |      |
- *                        |      |      |      |      |      |  |      |      |      |      |      |
- *                        `----------------------------------'  `----------------------------------'
- */
-    [_ADJUST] = LAYOUT(
-      _______, _______, _______, QWERTY , _______, _______,                                    _______, _______, _______, _______,  _______, _______,
-      _______, _______, _______, DVORAK , _______, _______,                                    RGB_TOG, RGB_SAI, RGB_HUI, RGB_VAI,  RGB_MOD, _______,
-      _______, _______, _______, COLEMAK, _______, _______,_______, _______, _______, _______, _______, RGB_SAD, RGB_HUD, RGB_VAD, RGB_RMOD, _______,
-                                 _______, _______, _______,_______, _______, _______, _______, _______, _______, _______
+      _______, _______, _______, RCS(KC_LEFT), RCS(KC_RIGHT), TD(ALT_UP),                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
+      _______, _______, _______, _______, CTRL_F2, TD(ALT_DOWN), _______, _______, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
+                                 _______, CTRL_BACK, CTRL_DELETE, _______, TD(HOME_SHIFT_END), TO(_DVORAK), _______, _______, _______, _______
     ),
 
 /*
@@ -235,26 +221,6 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______,  KC_F9 ,  KC_F10,  KC_F11,  KC_F12, _______,                                     _______, _______, _______, _______, _______, _______,
       _______,  KC_F5 ,  KC_F6 ,  KC_F7 ,  KC_F8 , _______,                                     _______, KC_RSFT, KC_RCTL, KC_LALT, KC_RGUI, _______,
       _______,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
-                                 _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
-    ),
-/*
- * Layer template
- *
- * ,-------------------------------------------.                              ,-------------------------------------------.
- * |        |      |      |      |      |      |                              |      |      |      |      |      |        |
- * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |        |      |      |      |      |      |                              |      |      |      |      |      |        |
- * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * |        |      |      |      |      |      |      |      |  |      |      |      |      |      |      |      |        |
- * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        |      |      |      |      |      |  |      |      |      |      |      |
- *                        |      |      |      |      |      |  |      |      |      |      |      |
- *                        `----------------------------------'  `----------------------------------'
- */
-    [_MOUSE] = LAYOUT(
-      _______, _______, _______, _______, _______, _______,                                     _______, _______, _______, _______, _______, _______,
-      _______, _______, _______, KC_BTN1, KC_MS_U, KC_BTN2,                                     _______, _______, _______, _______, _______, _______,
-      _______, _______, _______, KC_MS_L, KC_MS_D, KC_MS_R, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
                                  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
     ),
 // /*
@@ -452,33 +418,11 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
         unregister_code(KC_RCTL);
           //on click select word
       }
-        // // DEFAULT Page up/Page down
-        // if (clockwise) {
-        //     tap_code(KC_PGDN);
-        // } else {
-        //     tap_code(KC_PGUP);
-        // }
+
     }
     //RIGHT ENCODER
     else if (index == 1) {
-      // if(IS_LAYER_ON(_DVORAK)){
-      //   if(clockwise){
-      //     //select rightwards
-      //     // register_code(KC_RCTL);
-      //     tap_code(KC_MS_RIGHT);
-      //     tap_code(KC_MS_RIGHT);
-      //     tap_code(KC_MS_RIGHT);
-      //   }else{
-      //     // register_code(KC_RCTL);
-      //     tap_code(KC_MS_LEFT);
-      //     tap_code(KC_MS_LEFT);
-      //     tap_code(KC_MS_LEFT);
-      //     //select leftwards
-      //   }
-      //   // unregister_code(KC_RCTL);
-      //     //on click select word
-      // }else{
-        // DEFAULT Page up/Page down
+      if(IS_LAYER_ON(_DVORAK)){
         if (clockwise) {
           if (is_alt_tab_active) {
             tap_code(KC_LEFT);
@@ -496,24 +440,19 @@ bool encoder_update_user(uint8_t index, bool clockwise) {
             tap_code(KC_PGUP);
           }
         }
+      }else{
+        // DEFAULT Page up/Page down
+        if (clockwise) {
+            register_code(KC_RCTL);
+            tap_code(KC_Y);
+            unregister_code(KC_RCTL);
+        } else {
+            register_code(KC_RCTL);
+            tap_code(KC_Z);
+            unregister_code(KC_RCTL);
+        }
       }
-    // }
-    // else{
-    //     if(IS_LAYER_ON(_SYM)){
-    //     if(clockwise){
-    //       //select rightwards
-    //       // register_code(KC_RCTL);
-    //       tap_code(KC_MS_U);
-    //     }else{
-    //       // register_code(KC_RCTL);
-    //       tap_code(KC_MS_D);
-    //       //select leftwards
-    //     }
-    //     // unregister_code(KC_RCTL);
-    //       //on click select word
-    //   }
-    // }
-
+    }
     return false;
 }
 #endif
@@ -523,6 +462,14 @@ uint8_t mod_state;
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   mod_state = get_mods();
   switch (keycode) { // This will do most of the grunt work with the keycodes.
+    // case KC_UP:
+    // case KC_DOWN:
+    //   if (is_ctrl_tab_active) {
+    //     ctrl_tab_timer = timer_read();
+    //   }else{
+    //     tap_code(keycode);
+    //   }
+    //   break;
     case ALT_TAB:
       if (record->event.pressed) {
         if (!is_alt_tab_active) {
@@ -554,11 +501,43 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       break;
     case SAVE:
-        if(record->event.pressed){
-            key_timer = timer_read();
-        }else{
-
+        register_code(KC_RCTL);
+        tap_code(KC_S);
+        unregister_code(KC_RCTL);
+      break;
+    case CTRL_BACK:
+        if (record->event.pressed) {
+          register_code(KC_RCTL);
+          tap_code(KC_BSPC);
         }
+        unregister_code(KC_RCTL);
+      break;
+    case CTRL_DELETE:
+      if (record->event.pressed) {
+        register_code(KC_RCTL);
+        tap_code(KC_DEL);
+      }
+      unregister_code(KC_RCTL);
+      break;
+    case CTRL_F2:
+      if (record->event.pressed) {
+        register_code(KC_RCTL);
+        tap_code(KC_F2);
+      }
+      unregister_code(KC_RCTL);
+      break;
+    // case CTRL_TAB:
+    //   if (record->event.pressed) {
+    //     if (!is_ctrl_tab_active) {
+    //       is_ctrl_tab_active = true;
+    //       register_code(KC_RCTL);
+    //       ctrl_tab_timer = timer_read();
+    //       register_code(KC_TAB);
+    //     }
+    //   }else {
+    //     unregister_code(KC_RCTL);
+    //   }
+    //   break;
     case SAVE_TAB:
         if (record->event.pressed) {
             register_code(KC_RCTL);
@@ -607,6 +586,12 @@ void matrix_scan_user(void) { // The very important timer.
       is_alt_tab_active = false;
     }
   }
+  // if (is_ctrl_tab_active) {
+  //   if (timer_elapsed(ctrl_tab_timer) > 1000) {
+  //     unregister_code(KC_TAB);
+  //     is_ctrl_tab_active = false;
+  //   }
+  // }
 }
 
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record){
@@ -788,6 +773,32 @@ void obj_arrow_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
+void jira_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+           tap_code(KC_J);
+           break;
+      case TD_SINGLE_HOLD:
+           SEND_STRING("https://jira.g2planet.com/browse/EC-");
+           break;
+      case TD_DOUBLE_TAP:
+           break;
+      default:
+        break;
+  }
+}
+
+void jira_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP:
+      break;
+    default:
+      break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
 void dlr_this_finished(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
@@ -913,6 +924,10 @@ void paste_finished(qk_tap_dance_state_t *state, void *user_data) {
            register_code(KC_RCTL);
            tap_code(KC_V);
            break;
+      case TD_DOUBLE_TAP:
+           register_code(KC_LWIN);
+           tap_code(KC_V);
+           break;
       default:
         break;
   }
@@ -924,6 +939,9 @@ void paste_reset(qk_tap_dance_state_t *state, void *user_data) {
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
+      break;
+    case TD_DOUBLE_TAP:
+      unregister_code(KC_LWIN);
       break;
     default:
       break;
@@ -1021,7 +1039,7 @@ void all_finished(qk_tap_dance_state_t *state, void *user_data) {
       case TD_SINGLE_TAP:
            tap_code(KC_A);
            break;
-      case TD_SINGLE_HOLD:
+      case TD_DOUBLE_TAP:
            register_code(KC_RCTL);
            tap_code(KC_A);
            break;
@@ -1034,7 +1052,7 @@ void all_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
-    case TD_SINGLE_HOLD:
+    case TD_DOUBLE_TAP:
       unregister_code(KC_RCTL);
       break;
     default:
@@ -1051,10 +1069,6 @@ void find_finished(qk_tap_dance_state_t *state, void *user_data) {
            break;
       case TD_SINGLE_HOLD:
            register_code(KC_RCTL);
-           tap_code(KC_F);
-           break;
-      case TD_DOUBLE_TAP:
-           register_code(KC_RCTL);
            register_code(KC_RSFT);
            tap_code(KC_F);
            break;
@@ -1069,9 +1083,6 @@ void find_reset(qk_tap_dance_state_t *state, void *user_data) {
     case TD_SINGLE_TAP:
       break;
     case TD_SINGLE_HOLD:
-      unregister_code16(KC_RCTL);
-      break;
-    case TD_DOUBLE_TAP:
       unregister_code(KC_RCTL);
       unregister_code(KC_RSFT);
     default:
@@ -1092,10 +1103,6 @@ void home_shift_end_finished(qk_tap_dance_state_t *state, void *user_data) {
            tap_code(KC_END);
            tap_code(KC_SCLN);
            break;
-      case TD_DOUBLE_TAP:
-          tap_code(KC_BSPC);
-           break;
-
       default:
         break;
   }
@@ -1264,6 +1271,7 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [UNDO] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, undo_finished, undo_reset),
   [REDO] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, redo_finished, redo_reset),
   [ALL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, all_finished, all_reset),
+  [JIRA] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, jira_finished, jira_reset),
   [LSHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_brace_finished, shift_brace_reset),
   [FIND_PAGE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, find_page_finished, find_page_reset),
   [OBJ_ARROW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, obj_arrow_finished, obj_arrow_reset),
