@@ -40,7 +40,6 @@ enum{
     DLR_THIS,
     TERMINAL,
     CLOSE_EXPLORER,
-    CLOSE_WINDOW,
     FIND,
     HOME_SHIFT_END,
     UNDO,
@@ -50,6 +49,7 @@ enum{
     ALT_UP,
 	  COMMENT_LINE,
     JIRA,
+    MR,
 };
 
 typedef enum {
@@ -89,6 +89,8 @@ enum custom_keycodes {          // Make sure have the awesome keycode ready
     REFRESH,
     REFRESH_FRAME,
     CTRL_F2,
+    COLLAPSE,
+    UNCOLLAPSE,
 };
 
 #ifdef RGBLIGHT_ENABLE
@@ -150,7 +152,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
  * |Ctrl/Esc|   A  |   O  |   E  |   U  |   I  |                              |   D  |   H  |   T  |   N  |   S  |Enter   |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |ctrltab|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | ?      |
+ * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |alttab|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | ?      |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
  *                        | SAVE |   ←  |  →   | Space| Sym  |  | Sym  | Space| AltGr| RGUI | Menu |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
@@ -159,7 +161,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_DVORAK] = LAYOUT(
      TD(TERMINAL),KC_QUOTE,KC_COMM,  KC_DOT,   TD(FIND_PAGE) ,   TD(REDO) ,                                        TD(FIND),   KC_G ,  TD(COPY) ,  KC_R ,  KC_L, KC_DEL,
      CTL_ESC, TD(ALL),  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  KC_N,  KC_S , KC_ENT,
-     KC_LSFT, KC_SCLN, KC_Q   ,  TD(JIRA)  ,   KC_K ,   TD(CUT) , KC_LBRC, CTRL_TAB,     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  TD(CLOSE_WINDOW),   TD(PASTE) ,  TD(UNDO), KC_QUES,
+     KC_LSFT, KC_SCLN, TD(MR),  TD(JIRA)  ,   KC_K ,   TD(CUT) , KC_LBRC, ALT_TAB,     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  KC_W,   TD(PASTE) ,  TD(UNDO), KC_QUES,
                                  SAVE, KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, ALT_TAB
     ),
 /*
@@ -186,9 +188,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * Nav Layer: Media, navigation
  *
  * ,-------------------------------------------.                              ,-------------------------------------------.
- * |        |      |      |      |      |      |                              | PgUp | Home |   ↑  | End  | VolUp| Delete |
+ * |        |      |      |      |uncollapse|collapse|                              | PgUp | Home |   ↑  | End  | VolUp| Delete |
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
- * |        |      |      | sc+<-| sc+->|ALT_UP|                              | PgDn |  ←   |   ↓  |   →  | VolDn| Insert |
+ * |        |      |      | sc+<-| sc+->|ALT_UP|                              | PgDn |ctrl+←|   ↓  |ctrl+→| VolDn| Insert |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
  * |        |      |      |      |ctrlf2|LTDOWN|      |      |  |      |      | Pause|M Prev|M Play|M Next|VolMut| PrtSc  |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
@@ -197,8 +199,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  *                        `----------------------------------'  `----------------------------------'
  */
     [_NAV] = LAYOUT(
-      _______, _______, _______, _______, _______, _______,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
-      _______, _______, _______, RCS(KC_LEFT), RCS(KC_RIGHT), TD(ALT_UP),                                     KC_PGDN, KC_LEFT, KC_DOWN, KC_RGHT, KC_VOLD, KC_INS,
+      _______, _______, _______, _______, UNCOLLAPSE, COLLAPSE,                                     KC_PGUP, KC_HOME, KC_UP,   KC_END,  KC_VOLU, KC_DEL,
+      _______, _______, _______, RCS(KC_LEFT), RCS(KC_RIGHT), TD(ALT_UP),                                     KC_PGDN, RCTL(KC_LEFT), KC_DOWN, RCTL(KC_RGHT), KC_VOLD, KC_INS,
       _______, _______, _______, _______, CTRL_F2, TD(ALT_DOWN), _______, _______, _______, _______,KC_PAUSE, KC_MPRV, KC_MPLY, KC_MNXT, KC_MUTE, KC_PSCR,
                                  _______, CTRL_BACK, CTRL_DELETE, _______, TD(HOME_SHIFT_END), TO(_DVORAK), _______, _______, _______, _______
     ),
@@ -526,6 +528,26 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
       }
       unregister_code(KC_RCTL);
       break;
+    case COLLAPSE:
+      if (record->event.pressed) {
+        register_code(KC_RCTL);
+        tap_code(KC_K);
+        unregister_code(KC_RCTL);
+        register_code(KC_RCTL);
+        tap_code(KC_0);
+      }
+        unregister_code(KC_RCTL);
+      break;
+    case UNCOLLAPSE:
+      if (record->event.pressed) {
+        register_code(KC_RCTL);
+        tap_code(KC_K);
+        unregister_code(KC_RCTL);
+        register_code(KC_RCTL);
+        tap_code(KC_J);
+      }
+        unregister_code(KC_RCTL);
+      break;
     // case CTRL_TAB:
     //   if (record->event.pressed) {
     //     if (!is_ctrl_tab_active) {
@@ -601,7 +623,6 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record){
     case (OBJ_ARROW):
       return 100;
     case (DLR_THIS):
-    case (CLOSE_WINDOW):
     case (NEW):
       return 500;
     default:
@@ -799,6 +820,32 @@ void jira_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
+void mr_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+           tap_code(KC_Q);
+           break;
+      case TD_SINGLE_HOLD:
+           SEND_STRING("https://git.g2planet.com/g2planet/eclib/-/merge_requests/");
+           break;
+      case TD_DOUBLE_TAP:
+           break;
+      default:
+        break;
+  }
+}
+
+void mr_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP:
+      break;
+    default:
+      break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
 void dlr_this_finished(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
@@ -874,34 +921,6 @@ void close_explorer_finished(qk_tap_dance_state_t *state, void *user_data) {
 }
 
 void close_explorer_reset(qk_tap_dance_state_t *state, void *user_data) {
-  switch (shifttap_state.state) {
-    case TD_SINGLE_TAP:
-      break;
-    case TD_SINGLE_HOLD:
-      unregister_code16(KC_RCTL);
-      break;
-    default:
-      break;
-  }
-  shifttap_state.state = TD_NONE;
-}
-
-void close_window_finished(qk_tap_dance_state_t *state, void *user_data) {
-  shifttap_state.state = cur_dance(state);
-    switch (shifttap_state.state) {
-      case TD_SINGLE_TAP:
-           tap_code(KC_W);
-           break;
-      case TD_SINGLE_HOLD:
-           register_code(KC_RCTL);
-           tap_code(KC_W);
-           break;
-      default:
-        break;
-  }
-}
-
-void close_window_reset(qk_tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -998,6 +1017,29 @@ void redo_reset(qk_tap_dance_state_t *state, void *user_data) {
       break;
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
+      break;
+    default:
+      break;
+  }
+  shifttap_state.state = TD_NONE;
+}
+
+void alt_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
+  shifttap_state.state = cur_dance(state);
+    switch (shifttap_state.state) {
+      case TD_SINGLE_TAP:
+           register_code(KC_LALT);
+           tap_code(KC_TAB);
+           break;
+      default:
+        break;
+  }
+}
+
+void alt_tab_reset(qk_tap_dance_state_t *state, void *user_data) {
+  switch (shifttap_state.state) {
+    case TD_SINGLE_TAP:
+      unregister_code(KC_LALT);
       break;
     default:
       break;
@@ -1272,13 +1314,13 @@ qk_tap_dance_action_t tap_dance_actions[] = {
   [REDO] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, redo_finished, redo_reset),
   [ALL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, all_finished, all_reset),
   [JIRA] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, jira_finished, jira_reset),
+  [MR] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, mr_finished, mr_reset),
   [LSHIFT] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, shift_brace_finished, shift_brace_reset),
   [FIND_PAGE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, find_page_finished, find_page_reset),
   [OBJ_ARROW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, obj_arrow_finished, obj_arrow_reset),
   [DLR_THIS] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dlr_this_finished, dlr_this_reset),
   [TERMINAL] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, terminal_finished, terminal_reset),
   [CLOSE_EXPLORER] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, close_explorer_finished, close_explorer_reset),
-  [CLOSE_WINDOW] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, close_window_finished, close_window_reset),
   [FIND] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, find_finished, find_reset),
   [HOME_SHIFT_END] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, home_shift_end_finished, home_shift_end_reset),
   [ALT_DOWN] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, alt_down_finished, alt_down_reset),
