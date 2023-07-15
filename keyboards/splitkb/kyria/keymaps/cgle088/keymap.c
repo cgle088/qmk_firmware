@@ -69,10 +69,10 @@ typedef struct {
 
 uint16_t key_timer;
 
-td_state_t cur_dance(qk_tap_dance_state_t *state);
+td_state_t cur_dance(tap_dance_state_t *state);
 
-void x_finished(qk_tap_dance_state_t *state, void *user_data);
-void x_reset(qk_tap_dance_state_t *state, void *user_data);
+void x_finished(tap_dance_state_t *state, void *user_data);
+void x_reset(tap_dance_state_t *state, void *user_data);
 
 bool is_alt_tab_active = false; // ADD this near the begining of keymap.c
 bool is_ctrl_tab_active = false; // ADD this near the begining of keymap.c
@@ -126,6 +126,7 @@ void keyboard_post_init_user(void){
 #define QWERTY   DF(_QWERTY)
 #define COLEMAK  DF(_COLEMAK_DH)
 #define DVORAK   DF(_DVORAK)
+#define PD       DF(_PD)
 
 #define SYM      MO(_SYM)
 #define NAV      MO(_NAV)
@@ -152,16 +153,16 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
  * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
  * |Ctrl/Esc|   A  |   O  |   E  |   U  |   I  |                              |   D  |   H  |   T  |   N  |   S  |Enter   |
  * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
- * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |alttab|  |F-keys|  ] } |   B  |   M  |   W  |   V  |   Z  | ?      |
+ * | LShift | ; :  |   Q  |   J  |   K  |   X  | [ {  |alttab|  |layers|  ] } |   B  |   M  |   W  |   V  |   Z  | ?      |
  * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
- *                        | SAVE |   ←  |  →   | Space| Sym  |  | Sym  | Space| AltGr| RGUI | Menu |
+ *                        | SAVE |   ←  |  →   | Space| Sym  |  | Sym  | back | up   | down | Menu |
  *                        |      |      |      |      |      |  |      |      |      |      |      |
  *            ueu            `----------------------------------'  `----------------------------------'
  */
     [_DVORAK] = LAYOUT(
      TD(TERMINAL),KC_QUOTE,KC_COMM,  KC_DOT,   TD(FIND_PAGE) ,   TD(REDO) ,                                        TD(FIND),   KC_G ,  TD(COPY) ,  KC_R ,  KC_L, KC_DEL,
      CTL_ESC, TD(ALL),  KC_O,  KC_E,   KC_U ,   KC_I,                                       KC_D,   KC_H , KC_T,  KC_N,  KC_S , KC_ENT,
-     KC_LSFT, KC_SCLN, TD(MR),  TD(JIRA)  ,   KC_K ,   TD(CUT) , KC_LBRC, ALT_TAB,     FKEYS  , KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  KC_W,   TD(PASTE) ,  TD(UNDO), KC_QUES,
+     KC_LSFT, KC_SCLN, KC_Q,  KC_J  ,   KC_K ,   TD(CUT) , KC_LBRC, ALT_TAB,     ADJUST, KC_RBRC, TD(CLOSE_EXPLORER),   KC_M ,  KC_W,   TD(PASTE) ,  TD(UNDO), KC_QUES,
                                  SAVE, KC_LEFT, KC_RGHT, KC_SPC , MO(_SYM),     MO(_NAV), KC_BSPC ,KC_UP, KC_DOWN, ALT_TAB
     ),
 /*
@@ -225,6 +226,48 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
       _______,  KC_F1 ,  KC_F2 ,  KC_F3 ,  KC_F4 , _______, _______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
                                  _______, _______, _______, _______, _______, _______, _______, _______, _______, _______
     ),
+
+/*
+ * Layer: QWERTY
+ *
+ * ,-------------------------------------------.                              ,-------------------------------------------.
+ * |  Tab   |   Q  |   W  |   E  |   R  |   T  |                              |   Y  |   U  |   I  |   O  |   P  |  Bksp  |
+ * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
+ * |Ctrl/Esc|   A  |   S  |   D  |   F  |   G  |                              |   H  |   J  |   K  |   L  | ;  : |Ctrl/' "|
+ * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
+ * | LShift |   Z  |   X  |   C  |   V  |   B  | [ {  |CapsLk|  |F-keys|  ] } |   N  |   M  | ,  < | . >  | /  ? | RShift |
+ * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
+ *                        |Adjust| LGUI | LAlt/| Space| Nav  |  | Sym  | Space| AltGr| RGUI | Menu |
+ *                        |      |      | Enter|      |      |  |      |      |      |      |      |
+ *                        `----------------------------------'  `----------------------------------'
+ */
+    [_QWERTY] = LAYOUT(
+     KC_TAB  , KC_Q ,  KC_W   ,  KC_E  ,   KC_R ,   KC_T ,                                        KC_Y,   KC_U ,  KC_I ,   KC_O ,  KC_P , KC_BSPC,
+     CTL_ESC , KC_A ,  KC_S   ,  KC_D  ,   KC_F ,   KC_G ,                                        KC_H,   KC_J ,  KC_K ,   KC_L ,KC_SCLN,CTL_QUOT,
+     KC_LSFT , KC_Z ,  KC_X   ,  KC_C  ,   KC_V ,   KC_B , KC_LBRC,KC_CAPS,     FKEYS  , KC_RBRC, KC_N,   KC_M ,KC_COMM, KC_DOT ,KC_SLSH, KC_RSFT,
+                                ADJUST , KC_LGUI, ALT_ENT, KC_SPC , NAV   ,     SYM    , KC_SPC ,KC_RALT, KC_RGUI, KC_APP
+    ),
+
+/*
+ * Adjust Layer: Default layer settings, RGB
+ *
+ * ,-------------------------------------------.                              ,-------------------------------------------.
+ * |        |      |      |QWERTY|      |      |                              |      |      |      |      |      |        |
+ * |--------+------+------+------+------+------|                              |------+------+------+------+------+--------|
+ * |        |      |      |Dvorak|      |      |                              | TOG  | SAI  | HUI  | VAI  | MOD  |        |
+ * |--------+------+------+------+------+------+-------------.  ,-------------+------+------+------+------+------+--------|
+ * |        |      |      |PD    |      |      |      |      |  |      |      |      | SAD  | HUD  | VAD  | RMOD |        |
+ * `----------------------+------+------+------+------+------|  |------+------+------+------+------+----------------------'
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        |      |      |      |      |      |  |      |      |      |      |      |
+ *                        `----------------------------------'  `----------------------------------'
+ */
+    [_ADJUST] = LAYOUT(
+      _______, _______, _______, QWERTY , _______, _______,                                    _______, _______, _______, _______,  _______, _______,
+      _______, _______, _______, DVORAK , _______, _______,                                    _______, _______,_______, _______, _______, _______,
+      _______, _______, _______, PD, _______, _______,_______, _______, _______, _______, _______, _______, _______, _______, _______, _______,
+                                 _______, _______, _______,_______, _______, _______, _______, _______, _______, _______
+    ),
 // /*
 //  * Layer template
 //  *
@@ -246,14 +289,41 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 //     ),
 };
 
-/* The default OLED and rotary encoder code can be found at the bottom of qmk_firmware/keyboards/splitkb/kyria/rev1/rev1.c
- * These default settings can be overriden by your own settings in your keymap.c
- * For your convenience, here's a copy of those settings so that you can uncomment them if you wish to apply your own modifications.
- * DO NOT edit the rev1.c file; instead override the weakly defined default functions by your own.
- */
-      /* void render_logo(void){
 
-       // clang-format off
+#ifdef OLED_ENABLE
+oled_rotation_t oled_init_user(oled_rotation_t rotation) { return OLED_ROTATION_180; }
+
+bool oled_task_user(void) {
+    if (is_keyboard_master()) {
+        // Host Keyboard Layer Status
+        oled_write_P(PSTR("Layer: "), false);
+        switch (get_highest_layer(layer_state|default_layer_state)) {
+            case _QWERTY:
+                oled_write_P(PSTR("QWERTY\n"), false);
+                break;
+            case _DVORAK:
+                oled_write_P(PSTR("Dvorak\n"), false);
+                break;
+            case _NAV:
+                oled_write_P(PSTR("Nav\n"), false);
+                break;
+            case _SYM:
+                oled_write_P(PSTR("Sym\n"), false);
+                break;
+            case _FUNCTION:
+                oled_write_P(PSTR("Function\n"), false);
+                break;
+            case _ADJUST:
+                oled_write_P(PSTR("Adjust\n"), false);
+                break;
+            case _PD:
+                oled_write_P(PSTR("PD\n"), false);
+                break;
+            default:
+                oled_write_P(PSTR("Undefined\n"), false);
+        }
+    } else {
+        // clang-format off
         static const char PROGMEM kyria_logo[] = {
             0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,128,128,192,224,240,112,120, 56, 60, 28, 30, 14, 14, 14,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7,  7, 14, 14, 14, 30, 28, 60, 56,120,112,240,224,192,128,128,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
             0,  0,  0,  0,  0,  0,  0,192,224,240,124, 62, 31, 15,  7,  3,  1,128,192,224,240,120, 56, 60, 28, 30, 14, 14,  7,  7,135,231,127, 31,255,255, 31,127,231,135,  7,  7, 14, 14, 30, 28, 60, 56,120,240,224,192,128,  1,  3,  7, 15, 31, 62,124,240,224,192,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
@@ -266,109 +336,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         };
         // clang-format on
         oled_write_raw_P(kyria_logo, sizeof(kyria_logo));
-    }*/
-
-#ifdef OLED_ENABLE
-bool oled_task_user(void) {
-    // Host Keyboard Layer Status
-    // oled_write_P(PSTR("Layer: "), false);
-  if(is_keyboard_master()){
-    switch (get_highest_layer(layer_state)) {
-        case _DVORAK:
-            oled_write_P(PSTR("Dvorak\n"), false);
-            break;
-        case _SYM:
-            oled_write_P(PSTR("Sym\n"), false);
-            break;
-        case _NAV:
-            oled_write_P(PSTR("Nav\n"), false);
-            break;
-        default:
-            // Or use the write_ln shortcut over adding '\n' to the end of your string
-            oled_write_ln_P(PSTR("Undefined"), false);
     }
-  }
-  if(is_keyboard_left()){
-       switch (get_highest_layer(layer_state)) {
-        case _DVORAK:
-            oled_write_P(PSTR("Dvorak\n"), false);
-            break;
-        case _SYM:
-            oled_write_P(PSTR("Sym\n"), false);
-            break;
-        case _NAV:
-            oled_write_P(PSTR("Nav\n"), false);
-            break;
-        default:
-            // Or use the write_ln shortcut over adding '\n' to the end of your string
-            oled_write_ln_P(PSTR("Undefined"), false);
-       }
-  }
-
-    // Host Keyboard LED Status
-    // led_t led_state = host_keyboard_led_state();
-    // oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
-    // oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
-    // oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
-
-    return false;
+    return false;u
 }
 #endif
-// #ifdef OLED_ENABLE
-// bool oled_task_user(void) {
-//     // Host Keyboard Layer Status
-//     oled_write_P(PSTR("Layer: "), false);
-
-//     switch (get_highest_layer(layer_state)) {
-//         case _DVORAK:
-//             oled_write_P(PSTR("Default\n"), false);
-//             break;
-//         // case _FN:
-//         //     oled_write_P(PSTR("FN\n"), false);
-//         //     break;
-//         // case _ADJ:
-//         //     oled_write_P(PSTR("ADJ\n"), false);
-//         //     break;
-//         default:
-//             // Or use the write_ln shortcut over adding '\n' to the end of your string
-//             oled_write_ln_P(PSTR("Undefined"), false);
-//     }
-
-//     // Host Keyboard LED Status
-//     led_t led_state = host_keyboard_led_state();
-//     oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
-//     oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
-//     oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
-
-//     return false;
-// }
-// oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-//   if(!is_keyboard_master()){
-//      return OLED_ROTATION_180;
-//   }
-//   return rotation;
-// }
-
-// bool oled_task_user(void){
-
-    // oled_write_P(PSTR("Layer:"), false);
-
-    // switch (get_highest_layer(layer_state)){
-    //     case _DVORAK:
-            // oled_write_P(PSTR("Default\n"), false);
-    //         break;
-    //     case _SYM:
-    //         oled_write_P(PSTR("SYM\n"), false);
-    //         break;
-    //     default:
-    //         oled_write_ln_P(PSTR("Undefined"), false);
-    // }
-    //     led_t led_state = host_keyboard_led_state();
-    //     oled_write_P(led_state.num_lock ? PSTR("NUM ") : PSTR("    "), false);
-    //     oled_write_P(led_state.caps_lock ? PSTR("CAP ") : PSTR("    "), false);
-    //     oled_write_P(led_state.scroll_lock ? PSTR("SCR ") : PSTR("    "), false);
-// }
-// #endif
 
 /*layer_state_t layer_state_set_user(layer_state_t state) {
     switch (get_highest_layer(state)) {
@@ -630,7 +601,7 @@ uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record){
   }
 }
 
-td_state_t cur_dance(qk_tap_dance_state_t *state) {
+td_state_t cur_dance(tap_dance_state_t *state) {
   if (state->count == 1) {
     if (state->interrupted || !state->pressed)
         return TD_SINGLE_TAP;
@@ -655,7 +626,7 @@ static td_tap_t shifttap_state = {
     .state = TD_NONE
 };
 
-void s_finished(qk_tap_dance_state_t *state, void *user_data) {
+void s_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -670,7 +641,7 @@ void s_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void s_reset(qk_tap_dance_state_t *state, void *user_data) {
+void s_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -683,7 +654,7 @@ void s_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void copy_finished(qk_tap_dance_state_t *state, void *user_data) {
+void copy_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -698,7 +669,7 @@ void copy_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void copy_reset(qk_tap_dance_state_t *state, void *user_data) {
+void copy_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP: unregister_code(KC_C); break;
     case TD_SINGLE_HOLD:
@@ -711,7 +682,7 @@ void copy_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void new_finished(qk_tap_dance_state_t *state, void *user_data) {
+void new_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -726,7 +697,7 @@ void new_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void new_reset(qk_tap_dance_state_t *state, void *user_data) {
+void new_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP: unregister_code(KC_N); break;
     case TD_SINGLE_HOLD:
@@ -739,7 +710,7 @@ void new_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void find_page_finished(qk_tap_dance_state_t *state, void *user_data) {
+void find_page_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -754,7 +725,7 @@ void find_page_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void find_page_reset(qk_tap_dance_state_t *state, void *user_data) {
+void find_page_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP: break;
     case TD_SINGLE_HOLD:
@@ -766,7 +737,7 @@ void find_page_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void obj_arrow_finished(qk_tap_dance_state_t *state, void *user_data) {
+void obj_arrow_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -783,7 +754,7 @@ void obj_arrow_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void obj_arrow_reset(qk_tap_dance_state_t *state, void *user_data) {
+void obj_arrow_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code16(KC_GT);
@@ -794,7 +765,7 @@ void obj_arrow_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void jira_finished(qk_tap_dance_state_t *state, void *user_data) {
+void jira_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -810,7 +781,7 @@ void jira_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void jira_reset(qk_tap_dance_state_t *state, void *user_data) {
+void jira_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -820,7 +791,7 @@ void jira_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void mr_finished(qk_tap_dance_state_t *state, void *user_data) {
+void mr_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -836,7 +807,7 @@ void mr_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void mr_reset(qk_tap_dance_state_t *state, void *user_data) {
+void mr_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -846,7 +817,7 @@ void mr_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void dlr_this_finished(qk_tap_dance_state_t *state, void *user_data) {
+void dlr_this_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -866,7 +837,7 @@ void dlr_this_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void dlr_this_reset(qk_tap_dance_state_t *state, void *user_data) {
+void dlr_this_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code16(KC_DLR);
@@ -877,7 +848,7 @@ void dlr_this_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void terminal_finished(qk_tap_dance_state_t *state, void *user_data) {
+void terminal_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -892,7 +863,7 @@ void terminal_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void terminal_reset(qk_tap_dance_state_t *state, void *user_data) {
+void terminal_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -905,7 +876,7 @@ void terminal_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void close_explorer_finished(qk_tap_dance_state_t *state, void *user_data) {
+void close_explorer_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -920,7 +891,7 @@ void close_explorer_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void close_explorer_reset(qk_tap_dance_state_t *state, void *user_data) {
+void close_explorer_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -933,7 +904,7 @@ void close_explorer_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void paste_finished(qk_tap_dance_state_t *state, void *user_data) {
+void paste_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -952,7 +923,7 @@ void paste_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void paste_reset(qk_tap_dance_state_t *state, void *user_data) {
+void paste_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -968,7 +939,7 @@ void paste_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void cut_finished(qk_tap_dance_state_t *state, void *user_data) {
+void cut_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -983,7 +954,7 @@ void cut_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void cut_reset(qk_tap_dance_state_t *state, void *user_data) {
+void cut_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -996,7 +967,7 @@ void cut_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void redo_finished(qk_tap_dance_state_t *state, void *user_data) {
+void redo_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1011,7 +982,7 @@ void redo_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void redo_reset(qk_tap_dance_state_t *state, void *user_data) {
+void redo_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -1024,7 +995,7 @@ void redo_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void alt_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
+void alt_tab_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1036,7 +1007,7 @@ void alt_tab_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void alt_tab_reset(qk_tap_dance_state_t *state, void *user_data) {
+void alt_tab_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code(KC_LALT);
@@ -1047,7 +1018,7 @@ void alt_tab_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void undo_finished(qk_tap_dance_state_t *state, void *user_data) {
+void undo_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1062,7 +1033,7 @@ void undo_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void undo_reset(qk_tap_dance_state_t *state, void *user_data) {
+void undo_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -1075,7 +1046,7 @@ void undo_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void all_finished(qk_tap_dance_state_t *state, void *user_data) {
+void all_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1090,7 +1061,7 @@ void all_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void all_reset(qk_tap_dance_state_t *state, void *user_data) {
+void all_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -1103,7 +1074,7 @@ void all_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void find_finished(qk_tap_dance_state_t *state, void *user_data) {
+void find_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1120,7 +1091,7 @@ void find_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void find_reset(qk_tap_dance_state_t *state, void *user_data) {
+void find_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       break;
@@ -1133,7 +1104,7 @@ void find_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void home_shift_end_finished(qk_tap_dance_state_t *state, void *user_data) {
+void home_shift_end_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1150,7 +1121,7 @@ void home_shift_end_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void home_shift_end_reset(qk_tap_dance_state_t *state, void *user_data) {
+void home_shift_end_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code(KC_RSFT);
@@ -1164,7 +1135,7 @@ void home_shift_end_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void shift_brace_finished(qk_tap_dance_state_t *state, void *user_data) {
+void shift_brace_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1186,7 +1157,7 @@ void shift_brace_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void shift_brace_reset(qk_tap_dance_state_t *state, void *user_data) {
+void shift_brace_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code16(KC_LPRN);
@@ -1208,7 +1179,7 @@ void shift_brace_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void alt_down_finished(qk_tap_dance_state_t *state, void *user_data) {
+void alt_down_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1225,7 +1196,7 @@ void alt_down_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void alt_down_reset(qk_tap_dance_state_t *state, void *user_data) {
+void alt_down_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code(KC_LALT);
@@ -1241,7 +1212,7 @@ void alt_down_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void alt_up_finished(qk_tap_dance_state_t *state, void *user_data) {
+void alt_up_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1258,7 +1229,7 @@ void alt_up_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void alt_up_reset(qk_tap_dance_state_t *state, void *user_data) {
+void alt_up_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_TAP:
       unregister_code(KC_LALT);
@@ -1274,7 +1245,7 @@ void alt_up_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-void comment_line_finished(qk_tap_dance_state_t *state, void *user_data) {
+void comment_line_finished(tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = cur_dance(state);
     switch (shifttap_state.state) {
       case TD_SINGLE_TAP:
@@ -1289,7 +1260,7 @@ void comment_line_finished(qk_tap_dance_state_t *state, void *user_data) {
   }
 }
 
-void comment_line_reset(qk_tap_dance_state_t *state, void *user_data) {
+void comment_line_reset(tap_dance_state_t *state, void *user_data) {
   switch (shifttap_state.state) {
     case TD_SINGLE_HOLD:
       unregister_code(KC_RCTL);
@@ -1302,9 +1273,8 @@ void comment_line_reset(qk_tap_dance_state_t *state, void *user_data) {
   shifttap_state.state = TD_NONE;
 }
 
-
 #ifdef TAP_DANCE_ENABLE
-qk_tap_dance_action_t tap_dance_actions[] = {
+tap_dance_action_t tap_dance_actions[] = {
   [SAVE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, s_finished, s_reset),
   [COPY] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, copy_finished, copy_reset),
   [PASTE] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, paste_finished, paste_reset),
