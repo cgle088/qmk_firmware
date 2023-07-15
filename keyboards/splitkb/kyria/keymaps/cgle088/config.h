@@ -35,9 +35,6 @@
 #define OLED_FONT_HEIGHT 8
 #define TAPPING_TERM 150
 
-
-//Lets you roll mod-tap keys
-#define IGNORE_MOD_TAP_INTERRUPT
 #define MASTER_RIGHT
 // If you are using an Elite C rev3 on the slave side, uncomment the lines below:
 // #define SPLIT_USB_DETECT
